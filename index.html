@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriShop - Agriculture Inventory & Sales Management System</title>
+  
+  <!-- Chart.js for Sales & Inventory Graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+/* ─────────────────────────────────────────────────
+   AgriShop Inventory - Global CSS Styles
+   Agriculture-themed: deep greens, cream, earthy tones
+───────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ── CSS Custom Properties ── */
+:root {
+  --green-dark:    #1a4731;
+  --green-main:    #2d6a4f;
+  --green-mid:     #40916c;
+  --green-light:   #74c69d;
+  --green-pale:    #b7e4c7;
+  --green-bg:      #d8f3dc;
+  --cream:         #f8f9f0;
+  --earth:         #8b5e3c;
+  --earth-light:   #c49a6c;
+  --gold:          #f0a500;
+  --gold-light:    #fde68a;
+  --white:         #ffffff;
+  --gray-50:       #f9fafb;
+  --gray-100:      #f3f4f6;
+  --gray-200:      #e5e7eb;
+  --gray-300:      #d1d5db;
+  --gray-400:      #9ca3af;
+  --gray-500:      #6b7280;
+  --gray-600:      #4b5563;
+  --gray-700:      #374151;
+  --gray-800:      #1f2937;
+  --red:           #dc2626;
+  --red-light:     #fef2f2;
+  --orange:        #ea580c;
+  --orange-light:  #fff7ed;
+  --blue:          #2563eb;
+  --blue-light:    #eff6ff;
+  --sidebar-w:     260px;
+  --topbar-h:      64px;
+  --shadow-sm:     0 1px 3px rgba(0,0,0,.08);
+  --shadow-md:     0 4px 16px rgba(0,0,0,.10);
+  --shadow-lg:     0 8px 32px rgba(0,0,0,.14);
+  --radius:        12px;
+  --radius-sm:     8px;
+  --radius-lg:     16px;
+  --transition:    all .2s ease;
+}
+
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--cream);
+  color: var(--gray-800);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; }
+button { cursor: pointer; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--gray-100); }
+::-webkit-scrollbar-thumb { background: var(--green-pale); border-radius: 99px; }
+
+/* ─────────────────── LOGIN PAGE ─────────────────── */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-main) 50%, var(--green-mid) 100%);
+  position: relative;
+  overflow: hidden;
+}
+.login-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  z-index: 1;
+}
+.login-logo {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.login-logo .logo-icon {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, var(--green-main), var(--green-mid));
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 24px rgba(45,106,79,.3);
+}
+.login-logo h1 { font-size: 1.5rem; font-weight: 800; color: var(--green-dark); }
+.login-logo p  { color: var(--gray-500); font-size: .875rem; margin-top: 4px; }
+.login-card .demo-creds {
+  background: var(--green-bg);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  font-size: .8rem;
+  color: var(--green-dark);
+  line-height: 1.8;
+}
+.login-card .demo-creds strong { display: block; margin-bottom: 4px; }
+
+/* ─────────────────── LAYOUT ─────────────────── */
+.app-layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: var(--sidebar-w);
+  background: linear-gradient(180deg, var(--green-dark) 0%, #0f2d1e 100%);
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  transition: transform .3s ease;
+  overflow-y: auto;
+}
+.sidebar-header {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  flex-shrink: 0;
+}
+.sidebar-brand { display: flex; align-items: center; gap: 12px; }
+.sidebar-brand .brand-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--green-mid), var(--green-light));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.sidebar-brand .brand-text { min-width: 0; }
+.sidebar-brand .brand-text h2 { font-size: .95rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-brand .brand-text span { font-size: .7rem; color: var(--green-light); opacity: .8; }
+
+.sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+.nav-section { margin-bottom: 8px; }
+.nav-section-label { font-size: .65rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.35); padding: 8px 8px 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  color: rgba(255,255,255,.7); font-size: .875rem; font-weight: 500;
+  cursor: pointer; transition: var(--transition); margin-bottom: 2px;
+  white-space: nowrap; overflow: hidden;
+}
+.nav-item:hover { background: rgba(255,255,255,.08); color: var(--white); }
+.nav-item.active { background: linear-gradient(90deg, var(--green-mid), var(--green-light)); color: var(--white); box-shadow: 0 4px 12px rgba(64,145,108,.3); }
+.nav-item .nav-icon { font-size: 18px; flex-shrink: 0; width: 22px; text-align: center; }
+.nav-item .nav-badge { margin-left: auto; background: var(--red); color: var(--white); font-size: .65rem; font-weight: 700; border-radius: 99px; padding: 1px 7px; flex-shrink: 0; }
+.nav-group-toggle { justify-content: space-between; }
+.nav-group-toggle .nav-arrow { font-size: 12px; transition: transform .2s; margin-left: auto; }
+.nav-group-toggle.open .nav-arrow { transform: rotate(90deg); }
+.nav-submenu { display: none; padding-left: 34px; }
+.nav-submenu.open { display: block; }
+.nav-submenu .nav-item { font-size: .8125rem; padding: 7px 10px; }
+
+.sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.08); flex-shrink: 0; }
+.user-info { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); background: rgba(255,255,255,.05); }
+.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--green-mid), var(--green-light)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .9rem; flex-shrink: 0; }
+.user-details .user-name { font-size: .8125rem; font-weight: 600; }
+.user-details .user-role { font-size: .7rem; color: var(--green-light); }
+
+.main-content { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+.topbar {
+  height: var(--topbar-h); background: var(--white); border-bottom: 1px solid var(--gray-200);
+  display: flex; align-items: center; padding: 0 28px; position: sticky; top: 0; z-index: 50;
+  box-shadow: var(--shadow-sm); gap: 16px;
+}
+.topbar-menu-btn { display: none; background: none; border: none; font-size: 22px; color: var(--gray-600); padding: 4px; }
+.topbar-title { font-size: 1.125rem; font-weight: 700; color: var(--green-dark); flex: 1; }
+.topbar-subtitle { font-size: .8rem; color: var(--gray-500); font-weight: 400; }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.icon-btn { width: 40px; height: 40px; border: none; border-radius: var(--radius-sm); background: var(--gray-100); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--gray-600); transition: var(--transition); position: relative; }
+.icon-btn:hover { background: var(--green-bg); color: var(--green-main); }
+.storeroom-badge { background: var(--green-bg); color: var(--green-dark); border: 1px solid var(--green-pale); border-radius: var(--radius-sm); padding: 6px 14px; font-size: .8125rem; font-weight: 600; }
+
+.page-content { flex: 1; padding: 28px; max-width: 1600px; }
+.page-header { margin-bottom: 28px; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.page-header h2 { font-size: 1.5rem; font-weight: 800; color: var(--green-dark); display: flex; align-items: center; gap: 10px; }
+.page-header p  { color: var(--gray-500); font-size: .875rem; margin-top: 4px; }
+.page-header-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* ─────────────────── CARDS ─────────────────── */
+.card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
+.card-header { padding: 18px 20px 0; display: flex; align-items: center; justify-content: space-between; }
+.card-header h3 { font-size: 1rem; font-weight: 700; color: var(--gray-800); display: flex; align-items: center; gap: 8px; }
+.card-body { padding: 20px; }
+.card-body.p0 { padding: 0; }
+
+.stat-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); }
+.stat-card {
+  background: var(--white); border-radius: var(--radius); padding: 20px;
+  box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200);
+  display: flex; flex-direction: column; gap: 12px; transition: var(--transition);
+  position: relative; overflow: hidden;
+}
+.stat-card::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; }
+.stat-card.green::before  { background: linear-gradient(90deg, var(--green-main), var(--green-light)); }
+.stat-card.gold::before   { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+.stat-card.red::before    { background: linear-gradient(90deg, var(--red), #f87171); }
+.stat-card.blue::before   { background: linear-gradient(90deg, var(--blue), #60a5fa); }
+.stat-card.earth::before  { background: linear-gradient(90deg, var(--earth), var(--earth-light)); }
+.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.stat-card .stat-top { display: flex; align-items: flex-start; justify-content: space-between; }
+.stat-card .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.stat-card.green .stat-icon  { background: var(--green-bg); }
+.stat-card.gold .stat-icon   { background: #fefce8; }
+.stat-card.red .stat-icon    { background: var(--red-light); }
+.stat-card.blue .stat-icon   { background: var(--blue-light); }
+.stat-card.earth .stat-icon  { background: #fef3c7; }
+.stat-card .stat-value { font-size: 1.75rem; font-weight: 800; color: var(--gray-800); line-height: 1.2; }
+.stat-card .stat-label { font-size: .8125rem; color: var(--gray-500); font-weight: 500; }
+
+.storeroom-grid { display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); }
+.storeroom-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-200); padding: 20px; box-shadow: var(--shadow-sm); transition: var(--transition); }
+.storeroom-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.storeroom-card .sr-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--gray-100); }
+.storeroom-card .sr-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.sr-icon.sr1 { background: linear-gradient(135deg,#d8f3dc,#b7e4c7); }
+.sr-icon.sr2 { background: linear-gradient(135deg,#dbeafe,#bfdbfe); }
+.sr-icon.sr3 { background: linear-gradient(135deg,#fef3c7,#fde68a); }
+.storeroom-card .sr-name { font-weight: 700; font-size: .9375rem; color: var(--gray-800); }
+.storeroom-card .sr-code { font-size: .75rem; color: var(--gray-500); }
+.storeroom-card .sr-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.storeroom-card .sr-stat { text-align: center; }
+.storeroom-card .sr-stat-val { font-size: 1.125rem; font-weight: 700; color: var(--green-dark); }
+.storeroom-card .sr-stat-lbl { font-size: .65rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: .05em; }
+
+/* ─────────────────── BUTTONS ─────────────────── */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border: none; border-radius: var(--radius-sm); font-size: .875rem; font-weight: 600; cursor: pointer; transition: var(--transition); white-space: nowrap; text-decoration: none; }
+.btn-primary { background: linear-gradient(135deg, var(--green-main), var(--green-mid)); color: var(--white); box-shadow: 0 4px 12px rgba(45,106,79,.25); }
+.btn-primary:hover { background: linear-gradient(135deg, var(--green-dark), var(--green-main)); box-shadow: 0 6px 16px rgba(45,106,79,.35); transform: translateY(-1px); }
+.btn-secondary { background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-200); }
+.btn-secondary:hover { background: var(--gray-200); }
+.btn-danger  { background: var(--red); color: var(--white); }
+.btn-outline { background: transparent; color: var(--green-main); border: 1.5px solid var(--green-main); }
+.btn-outline:hover { background: var(--green-bg); }
+.btn-sm { padding: 6px 12px; font-size: .8125rem; }
+.btn-lg { padding: 12px 28px; font-size: 1rem; }
+
+/* ─────────────────── FORMS ─────────────────── */
+.form-group { margin-bottom: 18px; }
+.form-label { display: block; font-size: .8125rem; font-weight: 600; color: var(--gray-700); margin-bottom: 6px; }
+.form-label .required { color: var(--red); margin-left: 2px; }
+.form-control { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); font-size: .9rem; color: var(--gray-800); background: var(--white); outline: none; }
+.form-control:focus { border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(64,145,108,.12); }
+.form-row { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); }
+.calc-display { background: var(--green-bg); border: 1.5px solid var(--green-pale); border-radius: var(--radius-sm); padding: 10px 14px; font-weight: 700; font-size: 1.1rem; color: var(--green-dark); text-align: center; }
+
+/* ─────────────────── TABLES ─────────────────── */
+.table-wrapper { overflow-x: auto; border-radius: var(--radius); }
+.table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+.table th { background: var(--green-dark); color: var(--white); padding: 12px 14px; text-align: left; font-weight: 600; font-size: .8rem; letter-spacing: .03em; white-space: nowrap; }
+.table td { padding: 11px 14px; border-bottom: 1px solid var(--gray-100); color: var(--gray-700); vertical-align: middle; }
+.table tbody tr:hover { background: var(--green-bg); }
+
+/* ─────────────────── BADGES ─────────────────── */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: .7rem; font-weight: 600; }
+.badge-success { background: var(--green-bg); color: var(--green-dark); }
+.badge-danger  { background: var(--red-light); color: var(--red); }
+.badge-warning { background: var(--orange-light); color: var(--orange); }
+.badge-info    { background: var(--blue-light); color: var(--blue); }
+.badge-gold    { background: #fefce8; color: #92400e; }
+
+/* ─────────────────── TOASTS ─────────────────── */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 360px; }
+.toast { background: var(--white); border-left: 4px solid var(--green-main); border-radius: var(--radius-sm); padding: 14px 18px; box-shadow: var(--shadow-lg); display: flex; align-items: flex-start; gap: 12px; }
+.toast.toast-error   { border-color: var(--red); }
+.toast.toast-warning { border-color: var(--orange); }
+.toast .toast-body .toast-title { font-weight: 700; font-size: .875rem; color: var(--gray-800); }
+.toast .toast-body .toast-msg   { font-size: .8rem; color: var(--gray-600); margin-top: 2px; }
+.toast .toast-close { margin-left: auto; background: none; border: none; font-size: 16px; color: var(--gray-400); cursor: pointer; }
+
+/* ─────────────────── MODALS ─────────────────── */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: var(--transition); }
+.modal-backdrop.active { opacity: 1; visibility: visible; }
+.modal { background: var(--white); border-radius: var(--radius-lg); width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+.modal-md  { max-width: 600px; }
+.modal-lg  { max-width: 800px; }
+.modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; }
+.modal-header h3 { font-size: 1.0625rem; font-weight: 700; color: var(--green-dark); }
+.modal-close { background: none; border: none; font-size: 20px; color: var(--gray-400); cursor: pointer; }
+.modal-body { padding: 24px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+
+/* ─────────────────── FILTERS & CHARTS ─────────────────── */
+.filter-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; background: var(--white); padding: 16px 20px; border-radius: var(--radius); border: 1px solid var(--gray-200); margin-bottom: 20px; }
+.filter-bar .filter-item { display: flex; flex-direction: column; gap: 4px; min-width: 150px; flex: 1; }
+.filter-bar .filter-item label { font-size: .75rem; font-weight: 600; color: var(--gray-600); }
+.filter-bar .filter-item select, .filter-bar .filter-item input { padding: 8px 12px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); font-size: .875rem; color: var(--gray-800); background: var(--white); outline: none; }
+.chart-container { position: relative; height: 260px; }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--gray-500); }
+.tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--gray-200); margin-bottom: 24px; }
+.tab-btn { padding: 10px 18px; border: none; background: none; font-size: .875rem; font-weight: 600; color: var(--gray-500); cursor: pointer; position: relative; }
+.tab-btn.active { color: var(--green-main); }
+.tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--green-main); }
+.tag { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 99px; font-size: .7rem; font-weight: 600; background: var(--gray-100); color: var(--gray-600); }
+.divider { border: none; border-top: 1px solid var(--gray-200); margin: 20px 0; }
+.fw-600 { font-weight: 600; } .fw-700 { font-weight: 700; } .fs-xs { font-size: .75rem; } .fs-sm { font-size: .8125rem; }
+.text-green { color: var(--green-main); } .text-red { color: var(--red); } .text-orange { color: var(--orange); } .text-muted { color: var(--gray-500); }
+
+/* Print-specific Report Header */
+.print-only-header { display: none; }
+
+/* ─────────────────── PRINT STYLES ─────────────────── */
+@media print {
+  body { background: #ffffff !important; color: #000000 !important; font-size: 12pt !important; }
+  .sidebar, .topbar, .page-header-actions, .filter-bar, .toast-container, .modal-backdrop, .btn, .nav-badge, .topbar-actions { display: none !important; }
+  .main-content { margin-left: 0 !important; padding: 0 !important; }
+  .page-content { padding: 0 !important; max-width: 100% !important; }
+  .view-panel { display: block !important; }
+  .view-panel:not(.print-active) { display: none !important; }
+  .print-only-header { display: block !important; border-bottom: 2px solid #2d6a4f; padding-bottom: 12px; margin-bottom: 20px; text-align: center; }
+  .print-only-header h1 { font-size: 1.6rem; color: #1a4731; margin-bottom: 4px; }
+  .card { box-shadow: none !important; border: 1px solid #cccccc !important; margin-bottom: 20px !important; page-break-inside: avoid; }
+  .stat-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
+  .stat-card { border: 1px solid #ddd !important; box-shadow: none !important; padding: 10px !important; }
+  .table { width: 100% !important; border-collapse: collapse !important; }
+  .table th, .table td { border: 1px solid #cccccc !important; padding: 6px 10px !important; color: #000000 !important; font-size: 9pt !important; }
+  .table th { background-color: #f3f4f6 !important; color: #000000 !important; }
+  .chart-container { height: 300px !important; }
+}
+
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay { display: block !important; }
+  .main-content { margin-left: 0; }
+  .topbar-menu-btn { display: flex; }
+  .page-content { padding: 16px; }
+}
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 99; }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- ───────────────────────── LOGIN SCREEN ───────────────────────── -->
+  <div id="login-view" class="login-page">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-icon">🌱</div>
+        <h1>AgriShop Inventory</h1>
+        <p>3-Storeroom Inventory & Sales Management</p>
+      </div>
+
+      <div class="demo-creds">
+        <strong>🔑 Demo Login Credentials:</strong>
+        <div>👑 <b>Admin:</b> admin@agrishop.com / admin123</div>
+        <div>🧑‍🌾 <b>Staff:</b> staff@agrishop.com / staff123</div>
+      </div>
+
+      <form onsubmit="event.preventDefault(); App.login(document.getElementById('login-email').value, document.getElementById('login-pass').value);">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="login-email" class="form-control" value="admin@agrishop.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="login-pass" class="form-control" value="admin123" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px;">Sign In to Dashboard →</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ───────────────────────── MAIN APP VIEW ───────────────────────── -->
+  <div id="app-view" class="app-layout" style="display: none;">
+
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="brand-icon">🌱</div>
+          <div class="brand-text">
+            <h2>AgriShop Admin</h2>
+            <span>3 Storerooms Active</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-label">Main</div>
+          <a class="nav-item active" data-view="dashboard">
+            <span class="nav-icon">📊</span> Dashboard
+          </a>
+          <a class="nav-item" data-view="products">
+            <span class="nav-icon">📦</span> Products
+          </a>
+          <a class="nav-item" data-view="storerooms">
+            <span class="nav-icon">🏪</span> Storerooms
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Operations</div>
+          <a class="nav-item admin-only" data-view="daily-update">
+            <span class="nav-icon">📝</span> Daily Stock Update
+          </a>
+          <a class="nav-item" data-view="sales">
+            <span class="nav-icon">💰</span> Sales Management
+          </a>
+          <a class="nav-item admin-only" data-view="purchases">
+            <span class="nav-icon">📥</span> Purchases (Stock In)
+          </a>
+          <a class="nav-item admin-only" data-view="transfers">
+            <span class="nav-icon">🔄</span> Stock Transfer
+          </a>
+          <a class="nav-item admin-only" data-view="adjustments">
+            <span class="nav-icon">⚠️</span> Stock Adjustments
+          </a>
+          <a class="nav-item admin-only" data-view="suppliers">
+            <span class="nav-icon">🤝</span> Suppliers
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Alerts</div>
+          <a class="nav-item" data-view="low-stock">
+            <span class="nav-icon">🚨</span> Low Stock
+            <span id="badge-low-stock" class="nav-badge" style="display:none;">0</span>
+          </a>
+          <a class="nav-item" data-view="expiry-alerts">
+            <span class="nav-icon">⏳</span> Expiry Tracker
+            <span id="badge-expiry" class="nav-badge" style="display:none;">0</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-label">Analytics & Reports</div>
+          <div class="nav-item nav-group-toggle">
+            <span><span class="nav-icon">📄</span> Reports</span>
+            <span class="nav-arrow">▶</span>
+          </div>
+          <div class="nav-submenu">
+            <a class="nav-item" data-view="daily-report">Daily Report</a>
+            <a class="nav-item" data-view="monthly-report">Monthly Report</a>
+            <a class="nav-item" data-view="yearly-report">Yearly Report</a>
+            <a class="nav-item" data-view="product-report">Product-Wise Report</a>
+            <a class="nav-item" data-view="storeroom-report">Storeroom Report</a>
+          </div>
+          <a class="nav-item" data-view="history">
+            <span class="nav-icon">📜</span> Audit Ledger
+          </a>
+        </div>
+
+        <div class="nav-section admin-only">
+          <div class="nav-section-label">Administration</div>
+          <a class="nav-item" data-view="users">
+            <span class="nav-icon">👥</span> User Management
+          </a>
+          <a class="nav-item" data-view="settings">
+            <span class="nav-icon">⚙️</span> Supabase / Settings
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div id="user-avatar-initial" class="user-avatar">A</div>
+          <div class="user-details">
+            <div id="user-display-name" class="user-name">Admin User</div>
+            <div id="user-display-role" class="user-role">ADMIN</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="App.logout()" style="margin-left: auto;" title="Logout">🚪</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <header class="topbar">
+        <button id="menu-toggle-btn" class="topbar-menu-btn">☰</button>
+        <div>
+          <h1 id="page-title" class="topbar-title">Dashboard</h1>
+          <p class="topbar-subtitle">Real-time agricultural inventory tracking across 3 storerooms</p>
+        </div>
+        <div class="topbar-actions" style="margin-left: auto;">
+          <div class="storeroom-badge">🏬 3 Storerooms Active</div>
+          <button class="icon-btn" onclick="App.navigateTo('low-stock')" title="Low Stock Warnings">🚨</button>
+        </div>
+      </header>
+
+      <div class="page-content">
+
+        <!-- 1. DASHBOARD -->
+        <section id="view-dashboard" class="view-panel">
+          <div class="stat-grid mb-16">
+            <div class="stat-card green"><div class="stat-value" id="dash-total-products">0</div><div class="stat-label">Total Products</div></div>
+            <div class="stat-card gold"><div class="stat-value" id="dash-total-qty">0</div><div class="stat-label">Total Stock Quantity</div></div>
+            <div class="stat-card blue"><div class="stat-value" id="dash-total-val">₹0</div><div class="stat-label">Total Inventory Value</div></div>
+            <div class="stat-card green"><div class="stat-value" id="dash-today-sales">₹0</div><div class="stat-label">Today's Sales</div></div>
+            <div class="stat-card gold"><div class="stat-value" id="dash-month-sales">₹0</div><div class="stat-label">This Month's Sales</div></div>
+            <div class="stat-card earth"><div class="stat-value" id="dash-year-sales">₹0</div><div class="stat-label">This Year's Sales</div></div>
+            <div class="stat-card red"><div class="stat-value" id="dash-low-stock">0</div><div class="stat-label">Low Stock Items</div></div>
+            <div class="stat-card red"><div class="stat-value" id="dash-out-stock">0</div><div class="stat-label">Out of Stock Items</div></div>
+          </div>
+
+          <div class="section-header"><h3>🏪 Storeroom Stock Summaries</h3></div>
+          <div id="dash-storeroom-grid" class="storeroom-grid mb-16"></div>
+
+          <div class="form-row mb-16">
+            <div class="card" style="flex: 2;">
+              <div class="card-header"><h3>📈 7-Day Sales Trend</h3></div>
+              <div class="card-body"><div class="chart-container"><canvas id="chart-dash-sales"></canvas></div></div>
+            </div>
+            <div class="card" style="flex: 1;">
+              <div class="card-header"><h3>🍩 Stock Value per Storeroom</h3></div>
+              <div class="card-body"><div class="chart-container"><canvas id="chart-dash-storerooms"></canvas></div></div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="card" style="flex: 1;">
+              <div class="card-header"><h3>🛒 Recent Sales</h3><button class="btn btn-secondary btn-sm" onclick="App.navigateTo('sales')">View All</button></div>
+              <div class="card-body p0"><div class="table-wrapper"><table class="table"><thead><tr><th>Invoice</th><th>Date</th><th>Storeroom</th><th>Pay Method</th><th>Total</th></tr></thead><tbody id="dash-recent-sales"></tbody></table></div></div>
+            </div>
+            <div class="card" style="flex: 1;">
+              <div class="card-header"><h3>📜 Recent Stock Updates</h3><button class="btn btn-secondary btn-sm" onclick="App.navigateTo('history')">View Audit Log</button></div>
+              <div class="card-body p0"><div class="table-wrapper"><table class="table"><thead><tr><th>Time</th><th>Product</th><th>Storeroom</th><th>Action</th><th>Qty Move</th></tr></thead><tbody id="dash-recent-updates"></tbody></table></div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. PRODUCTS -->
+        <section id="view-products" class="view-panel" style="display: none;">
+          <div class="page-header">
+            <div><h2>📦 Product Management</h2><p>View, search, filter, add and edit agriculture store products</p></div>
+            <div class="page-header-actions admin-only"><button class="btn btn-primary" onclick="App.openAddProductModal()">➕ Add New Product</button></div>
+          </div>
+
+          <div class="filter-bar">
+            <div class="filter-item"><label>Search Product</label><input type="text" id="product-search-input" placeholder="Search..." onkeyup="App.renderProducts()"></div>
+            <div class="filter-item">
+              <label>Category</label>
+              <select id="product-cat-filter" onchange="App.renderProducts()">
+                <option value="">All Categories</option><option value="cat1">Fertilizers</option><option value="cat2">Pesticides</option><option value="cat3">Seeds</option><option value="cat4">Other Agriculture Products</option>
+              </select>
+            </div>
+            <div class="filter-item"><label>Stock Status</label><select id="product-status-filter" onchange="App.renderProducts()"><option value="">All Statuses</option><option value="active">Active</option></select></div>
+          </div>
+
+          <div class="card"><div class="card-body p0"><div class="table-wrapper"><table class="table" id="products-table"><thead><tr><th>ID</th><th>Product Name</th><th>Category</th><th>Buy Price</th><th>Sell Price</th><th>Total Stock</th><th>Min Stock</th><th>Status</th><th>Expiry</th><th>Actions</th></tr></thead><tbody id="products-table-body"></tbody></table></div></div></div>
+        </section>
+
+        <!-- 3. STOREROOMS -->
+        <section id="view-storerooms" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>🏪 Storerooms Inventory System</h2><p>Detailed breakdown of stock items across Storeroom 1, Storeroom 2, and Storeroom 3</p></div></div>
+          <div class="tabs" id="storeroom-tabs"></div>
+          <input type="hidden" id="storeroom-select-filter" value="sr1">
+          <div class="card"><div class="card-body p0"><div class="table-wrapper"><table class="table"><thead><tr><th>Product ID</th><th>Product Name</th><th>Unit</th><th>Available Quantity</th><th>Purchase Price</th><th>Total Stock Value</th><th>Stock Status</th></tr></thead><tbody id="storeroom-stock-table"></tbody></table></div></div></div>
+        </section>
+
+        <!-- 4. DAILY STOCK UPDATE -->
+        <section id="view-daily-update" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>📝 Daily Stock Update Form</h2><p>Reconcile daily opening stock, purchases, sales, transfers, and damages with automatic closing stock calculation</p></div></div>
+          <div class="card" style="max-width: 800px; margin: 0 auto;">
+            <div class="card-header"><h3>⚡ Quick Daily Stock Reconciliation</h3></div>
+            <div class="card-body">
+              <form id="daily-update-form" onsubmit="App.saveDailyUpdate(event)">
+                <div class="form-row">
+                  <div class="form-group"><label class="form-label">DATE <span class="required">*</span></label><input type="date" id="daily-update-date" class="form-control" required></div>
+                  <div class="form-group"><label class="form-label">STOREROOM <span class="required">*</span></label><select id="daily-update-storeroom" class="form-control" onchange="App.onDailyProductChange()" required></select></div>
+                </div>
+                <div class="form-group"><label class="form-label">PRODUCT <span class="required">*</span></label><select id="daily-update-product" class="form-control" onchange="App.onDailyProductChange()" required></select></div>
+                <div class="divider"></div>
+                <div class="form-row">
+                  <div class="form-group"><label class="form-label">OPENING STOCK (Editable by Admin) <span class="required">*</span></label><input type="number" id="daily-update-opening" class="form-control" value="0" oninput="App.calcDailyStock()"></div>
+                  <div class="form-group"><label class="form-label">PURCHASED / RECEIVED (+)</label><input type="number" id="daily-update-purchased" class="form-control" value="0" min="0" oninput="App.calcDailyStock()"></div>
+                  <div class="form-group"><label class="form-label">TRANSFER IN (+)</label><input type="number" id="daily-update-tr-in" class="form-control" value="0" min="0" oninput="App.calcDailyStock()"></div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group"><label class="form-label">SOLD (-)</label><input type="number" id="daily-update-sold" class="form-control" value="0" min="0" oninput="App.calcDailyStock()"></div>
+                  <div class="form-group"><label class="form-label">TRANSFER OUT (-)</label><input type="number" id="daily-update-tr-out" class="form-control" value="0" min="0" oninput="App.calcDailyStock()"></div>
+                  <div class="form-group"><label class="form-label">DAMAGED / EXPIRED (-)</label><input type="number" id="daily-update-damaged" class="form-control" value="0" min="0" oninput="App.calcDailyStock()"></div>
+                </div>
+                <div class="form-group mt-16"><label class="form-label">AUTOMATICALLY CALCULATED CLOSING STOCK</label><div class="calc-display" id="daily-update-closing">0</div></div>
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 20px;">💾 SAVE DAILY UPDATE (WITH CONFIRMATION)</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. SALES MANAGEMENT -->
+        <section id="view-sales" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>💰 Sales Management</h2><p>Record sales transactions to automatically reduce stock and generate customer invoices</p></div></div>
+          <div class="form-row mb-16">
+            <div class="card" style="flex: 1;">
+              <div class="card-header"><h3>🛒 Record New Sale</h3></div>
+              <div class="card-body">
+                <form id="sale-form" onsubmit="App.recordSale(event)">
+                  <div class="form-row">
+                    <div class="form-group"><label class="form-label">Date</label><input type="date" id="sale-form-date" class="form-control" required></div>
+                    <div class="form-group"><label class="form-label">Invoice #</label><input type="text" id="sale-form-invoice" class="form-control" required></div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group"><label class="form-label">Storeroom</label><select id="sale-form-storeroom" class="form-control" onchange="App.onSaleProductChange()" required></select></div>
+                    <div class="form-group"><label class="form-label">Product</label><select id="sale-form-product" class="form-control" onchange="App.onSaleProductChange()" required></select></div>
+                  </div>
+                  <div id="sale-stock-avail" class="form-hint text-green fw-600 mb-16"></div>
+                  <div class="form-row">
+                    <div class="form-group"><label class="form-label">Quantity Sold</label><input type="number" id="sale-form-qty" class="form-control" min="1" value="1" oninput="App.calcSaleTotal()" required></div>
+                    <div class="form-group"><label class="form-label">Selling Price (₹)</label><input type="number" id="sale-form-price" class="form-control" min="0" oninput="App.calcSaleTotal()" required></div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group"><label class="form-label">Customer Name</label><input type="text" id="sale-form-customer" class="form-control" placeholder="Optional"></div>
+                    <div class="form-group"><label class="form-label">Phone Number</label><input type="text" id="sale-form-phone" class="form-control" placeholder="Optional"></div>
+                  </div>
+                  <div class="form-group"><label class="form-label">Payment Method</label><select id="sale-form-paymethod" class="form-control"><option value="Cash">Cash</option><option value="UPI">UPI / GPay / PhonePe</option><option value="Bank Transfer">Bank Transfer</option><option value="Credit / Udhar">Credit / Udhar</option></select></div>
+                  <div class="form-group"><label class="form-label">Total Sale Amount</label><div class="calc-display" id="sale-form-total">₹0</div></div>
+                  <button type="submit" class="btn btn-primary" style="width: 100%;">💾 Record Sale & Reduce Stock</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="card" style="flex: 1.5;">
+              <div class="card-header"><h3>📜 Sales History</h3><button class="btn btn-outline btn-sm" onclick="App.exportToCSV('sales-report', 'sales-table')">📥 Export CSV</button></div>
+              <div class="card-body p0"><div class="table-wrapper"><table class="table" id="sales-table"><thead><tr><th>Invoice</th><th>Date</th><th>Storeroom</th><th>Customer</th><th>Items</th><th>Total</th><th>Action</th></tr></thead><tbody id="sales-history-body"></tbody></table></div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. PURCHASES -->
+        <section id="view-purchases" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>📥 Stock Purchase Management</h2><p>Record inward supplier purchases to automatically increase stock in the selected storeroom</p></div></div>
+          <div class="form-row">
+            <div class="card" style="flex: 1;">
+              <div class="card-header"><h3>📥 Record Purchase (Stock In)</h3></div>
+              <div class="card-body">
+                <form id="purchase-form" onsubmit="App.recordPurchase(event)">
+                  <div class="form-row">
+                    <div class="form-group"><label class="form-label">Purchase Date</label><input type="date" id="pur-form-date" class="form-control" required></div>
+                    <div class="form-group"><label class="form-label">Supplier</label><select id="pur-form-supplier" class="form-control" required></select></div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group"><label class="form-label">Invoice Number</label><input type="text" id="pur-form-invoice" class="form-control" required></div>
+                    <div class="form-group"><label class="form-label">Destination Storeroom</label><select id="pur-form-storeroom" class="form-control" required></select></div>
+                  </div>
+                  <div class="form-group"><label class="form-label">Product</label><select id="pur-form-product" class="form-control" onchange="App.onPurchaseProductChange()" required></select></div>
+                  <div class="form-row">
+                    <div class="form-group"><label class="form-label">Quantity</label><input type="number" id="pur-form-qty" class="form-control" min="1" value="1" oninput="App.calcPurchaseTotal()" required></div>
+                    <div class="form-group"><label class="form-label">Purchase Price per Unit (₹)</label><input type="number" id="pur-form-price" class="form-control" min="0" oninput="App.calcPurchaseTotal()" required></div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group"><label class="form-label">Batch Number</label><input type="text" id="pur-form-batch" class="form-control"></div>
+                    <div class="form-group"><label class="form-label">Expiry Date</label><input type="date" id="pur-form-expiry" class="form-control"></div>
+                  </div>
+                  <div class="form-group"><label class="form-label">Total Purchase Cost</label><div class="calc-display" id="pur-form-total">₹0</div></div>
+                  <button type="submit" class="btn btn-primary" style="width: 100%;">💾 Save Purchase & Increase Stock</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="card" style="flex: 1.5;">
+              <div class="card-header"><h3>📜 Purchase History</h3><button class="btn btn-outline btn-sm" onclick="App.exportToCSV('purchase-report', 'purchases-table')">📥 Export CSV</button></div>
+              <div class="card-body p0"><div class="table-wrapper"><table class="table" id="purchases-table"><thead><tr><th>Invoice</th><th>Date</th><th>Supplier</th><th>Storeroom</th><th>Items</th><th>Total Cost</th><th>Status</th></tr></thead><tbody id="purchases-history-body"></tbody></table></div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. TRANSFERS -->
+        <section id="view-transfers" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>🔄 Stock Transfer Between Storerooms</h2><p>Move product stock from one storeroom to another with automatic ledger updates</p></div></div>
+          <div class="form-row">
+            <div class="card" style="flex: 1;">
+              <div class="card-header"><h3>🔄 Execute Stock Transfer</h3></div>
+              <div class="card-body">
+                <form id="transfer-form" onsubmit="App.recordTransfer(event)">
+                  <div class="form-group"><label class="form-label">Transfer Date</label><input type="date" id="tr-form-date" class="form-control" required></div>
+                  <div class="form-group"><label class="form-label">Product to Transfer</label><select id="tr-form-product" class="form-control" onchange="App.onTransferFromChange()" required></select></div>
+                  <div class="form-row">
+                    <div class="form-group"><label class="form-label">From (Source Room)</label><select id="tr-form-from" class="form-control" onchange="App.onTransferFromChange()" required></select></div>
+                    <div class="form-group"><label class="form-label">To (Destination Room)</label><select id="tr-form-to" class="form-control" required></select></div>
+                  </div>
+                  <div id="tr-stock-avail" class="form-hint text-green fw-600 mb-16"></div>
+                  <div class="form-group"><label class="form-label">Quantity to Transfer</label><input type="number" id="tr-form-qty" class="form-control" min="1" required></div>
+                  <div class="form-group"><label class="form-label">Notes / Reason</label><input type="text" id="tr-form-notes" class="form-control"></div>
+                  <button type="submit" class="btn btn-primary" style="width: 100%;">🔄 Execute Transfer</button>
+                </form>
+              </div>
+            </div>
+            <div class="card" style="flex: 1.5;"><div class="card-header"><h3>📜 Transfer History Log</h3></div><div class="card-body p0"><div class="table-wrapper"><table class="table"><thead><tr><th>Date</th><th>Product</th><th>Source</th><th></th><th>Destination</th><th>Qty</th><th>Status</th></tr></thead><tbody id="transfers-history-body"></tbody></table></div></div></div>
+          </div>
+        </section>
+
+        <!-- 8. ADJUSTMENTS -->
+        <section id="view-adjustments" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>⚠️ Stock Adjustments (Damage / Loss / Expiry)</h2><p>Write off damaged, expired, or lost stock items with audit logging</p></div></div>
+          <div class="form-row">
+            <div class="card" style="flex: 1;">
+              <div class="card-header"><h3>⚠️ Record Stock Adjustment</h3></div>
+              <div class="card-body">
+                <form id="adjustment-form" onsubmit="App.recordAdjustment(event)">
+                  <div class="form-group"><label class="form-label">Date</label><input type="date" id="adj-form-date" class="form-control" required></div>
+                  <div class="form-row">
+                    <div class="form-group"><label class="form-label">Storeroom</label><select id="adj-form-storeroom" class="form-control" required></select></div>
+                    <div class="form-group"><label class="form-label">Product</label><select id="adj-form-product" class="form-control" required></select></div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group"><label class="form-label">Reason</label><select id="adj-form-reason" class="form-control" required><option value="Damaged">Damaged Goods</option><option value="Expired">Expired Stock</option><option value="Lost">Lost / Theft</option><option value="Audit Correction">Audit Correction</option></select></div>
+                    <div class="form-group"><label class="form-label">Quantity to Reduce</label><input type="number" id="adj-form-qty" class="form-control" min="1" required></div>
+                  </div>
+                  <div class="form-group"><label class="form-label">Detailed Notes <span class="required">*</span></label><textarea id="adj-form-notes" class="form-control" rows="2" required></textarea></div>
+                  <button type="submit" class="btn btn-danger" style="width: 100%;">⚠️ Record Stock Adjustment</button>
+                </form>
+              </div>
+            </div>
+            <div class="card" style="flex: 1.5;"><div class="card-header"><h3>📜 Adjustment History</h3></div><div class="card-body p0"><div class="table-wrapper"><table class="table"><thead><tr><th>Date</th><th>Product</th><th>Storeroom</th><th>Reason</th><th>Qty Written Off</th><th>Notes</th></tr></thead><tbody id="adjustments-history-body"></tbody></table></div></div></div>
+          </div>
+        </section>
+
+        <!-- 9. SUPPLIERS -->
+        <section id="view-suppliers" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>🤝 Supplier Management</h2><p>Manage vendors and agricultural product suppliers</p></div><button class="btn btn-primary" onclick="App.openModal('modal-supplier')">➕ Add New Supplier</button></div>
+          <div class="card"><div class="card-body p0"><div class="table-wrapper"><table class="table"><thead><tr><th>Supplier Name</th><th>Phone</th><th>Email</th><th>Address</th><th>Action</th></tr></thead><tbody id="suppliers-table-body"></tbody></table></div></div></div>
+        </section>
+
+        <!-- 10. LOW STOCK -->
+        <section id="view-low-stock" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>⚠️ Low Stock & Out of Stock Warnings</h2><p>Products reaching minimum threshold levels or 0 stock across all 3 storerooms</p></div></div>
+          <div class="card"><div class="card-body p0"><div class="table-wrapper"><table class="table"><thead><tr><th>Product Name</th><th>Storeroom</th><th>Current Stock</th><th>Minimum Stock</th><th>Alert Level</th><th>Action</th></tr></thead><tbody id="low-stock-body"></tbody></table></div></div></div>
+        </section>
+
+        <!-- 11. EXPIRY ALERTS -->
+        <section id="view-expiry-alerts" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>⏳ Expiry Date Tracker</h2><p>Alerts for pesticides, seeds, and agrochemicals expiring within 30 or 60 days</p></div></div>
+          <div class="card"><div class="card-body p0"><div class="table-wrapper"><table class="table"><thead><tr><th>Product</th><th>Batch Number</th><th>Expiry Date</th><th>Storeroom</th><th>Quantity</th><th>Alert Status</th></tr></thead><tbody id="expiry-alerts-body"></tbody></table></div></div></div>
+        </section>
+
+        <!-- 12. DAILY REPORT -->
+        <section id="view-daily-report" class="view-panel" style="display: none;">
+          <div class="page-header">
+            <div><h2>📄 Daily Inventory & Sales Report</h2><p>Comprehensive daily summary of transactions and sales</p></div>
+            <div class="page-header-actions">
+              <button class="btn btn-outline" onclick="App.exportToCSV('daily-report', 'daily-report-table')">📥 Export CSV</button>
+              <button class="btn btn-primary" onclick="App.printSpecificReport('daily-report')">🖨️ Print Daily Sales Report</button>
+            </div>
+          </div>
+          <div class="filter-bar"><div class="filter-item"><label>Select Date</label><input type="date" id="report-daily-date" onchange="App.renderDailyReport()"></div></div>
+          <div class="stat-grid mb-16">
+            <div class="stat-card green"><div class="stat-value" id="dr-sales-total">₹0</div><div class="stat-label">Total Daily Sales</div></div>
+            <div class="stat-card gold"><div class="stat-value" id="dr-purchases-total">₹0</div><div class="stat-label">Total Purchases Cost</div></div>
+            <div class="stat-card blue"><div class="stat-value" id="dr-sales-count">0</div><div class="stat-label">Sales Transactions</div></div>
+            <div class="stat-card earth"><div class="stat-value" id="dr-transfers-count">0</div><div class="stat-label">Stock Transfers</div></div>
+          </div>
+          <div class="card"><div class="card-header"><h3>🛒 Daily Sales Breakdown</h3></div><div class="card-body p0"><div class="table-wrapper"><table class="table" id="daily-report-table"><thead><tr><th>Invoice #</th><th>Customer</th><th>Storeroom</th><th>Payment Method</th><th>Total Amount</th></tr></thead><tbody id="daily-report-body"></tbody></table></div></div></div>
+        </section>
+
+        <!-- 13. MONTHLY REPORT -->
+        <section id="view-monthly-report" class="view-panel" style="display: none;">
+          <div class="page-header">
+            <div><h2>📅 Monthly Performance Report</h2><p>Monthly sales breakdown and charts</p></div>
+            <div class="page-header-actions">
+              <button class="btn btn-outline" onclick="App.exportToCSV('monthly-sales-report', 'monthly-report')">📥 Export CSV</button>
+              <button class="btn btn-primary" onclick="App.printSpecificReport('monthly-report')">🖨️ Print Monthly Sales Report</button>
+            </div>
+          </div>
+          <div class="filter-bar">
+            <div class="filter-item"><label>Month</label><select id="report-monthly-month" onchange="App.renderMonthlyReport()"><option value="01">January</option><option value="02">February</option><option value="03">March</option><option value="04">April</option><option value="05">May</option><option value="06">June</option><option value="07">July</option><option value="08">August</option><option value="09">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select></div>
+            <div class="filter-item"><label>Year</label><select id="report-monthly-year" onchange="App.renderMonthlyReport()"><option value="2026">2026</option><option value="2025">2025</option></select></div>
+          </div>
+          <div class="stat-grid mb-16">
+            <div class="stat-card green"><div class="stat-value" id="mr-total-sales">₹0</div><div class="stat-label">Total Monthly Revenue</div></div>
+            <div class="stat-card gold"><div class="stat-value" id="mr-total-purchases">₹0</div><div class="stat-label">Stock Purchased Cost</div></div>
+            <div class="stat-card blue"><div class="stat-value" id="mr-total-transfers">0</div><div class="stat-label">Inter-Room Transfers</div></div>
+          </div>
+          <div class="card"><div class="card-header"><h3>📊 Daily Sales Breakdown for Month</h3></div><div class="card-body"><div class="chart-container"><canvas id="chart-monthly-sales"></canvas></div></div></div>
+        </section>
+
+        <!-- 14. YEARLY REPORT -->
+        <section id="view-yearly-report" class="view-panel" style="display: none;">
+          <div class="page-header">
+            <div><h2>📊 Yearly Financial & Inventory Report</h2><p>Full 12-month sales and purchases performance comparison</p></div>
+            <div class="page-header-actions">
+              <button class="btn btn-outline" onclick="App.exportToCSV('yearly-sales-report', 'yearly-report')">📥 Export CSV</button>
+              <button class="btn btn-primary" onclick="App.printSpecificReport('yearly-report')">🖨️ Print Yearly Sales Report</button>
+            </div>
+          </div>
+          <div class="filter-bar"><div class="filter-item"><label>Select Year</label><select id="report-yearly-year" onchange="App.renderYearlyReport()"><option value="2026">2026</option><option value="2025">2025</option></select></div></div>
+          <div class="stat-grid mb-16">
+            <div class="stat-card green"><div class="stat-value" id="yr-total-sales">₹0</div><div class="stat-label">Total Yearly Revenue</div></div>
+            <div class="stat-card gold"><div class="stat-value" id="yr-total-purchases">₹0</div><div class="stat-label">Total Yearly Purchases</div></div>
+          </div>
+          <div class="card mb-16"><div class="card-header"><h3>📊 12-Month Sales & Purchases Chart (Jan - Dec)</h3></div><div class="card-body"><div class="chart-container"><canvas id="chart-yearly-sales"></canvas></div></div></div>
+        </section>
+
+        <!-- 15. PRODUCT REPORT -->
+        <section id="view-product-report" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>📦 Product-Wise Sales & Stock Report</h2><p>Individual product movement lifecycle report</p></div></div>
+          <div class="filter-bar"><div class="filter-item" style="max-width: 300px;"><label>Select Product</label><select id="report-product-select" onchange="App.renderProductReport()"></select></div></div>
+          <div class="card"><div class="card-header"><h3 id="pr-prod-name">Product Summary</h3></div><div class="card-body"><div class="stat-grid"><div class="stat-card gold"><div class="stat-value" id="pr-purchased">0</div><div class="stat-label">Purchased Qty</div></div><div class="stat-card green"><div class="stat-value" id="pr-sold">0</div><div class="stat-label">Sold Qty</div></div><div class="stat-card red"><div class="stat-value" id="pr-damaged">0</div><div class="stat-label">Damaged / Expired</div></div><div class="stat-card blue"><div class="stat-value" id="pr-current">0</div><div class="stat-label">Current Stock (3 Rooms)</div></div><div class="stat-card green"><div class="stat-value" id="pr-sales-val">₹0</div><div class="stat-label">Total Revenue</div></div></div></div></div>
+        </section>
+
+        <!-- 16. STOREROOM REPORT -->
+        <section id="view-storeroom-report" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>🏢 Storeroom Comparison Report</h2><p>Compare stock quantities and sales revenue across Storeroom 1, Storeroom 2, and Storeroom 3</p></div></div>
+          <div class="card"><div class="card-body p0"><div class="table-wrapper"><table class="table"><thead><tr><th>Storeroom</th><th>Products Active</th><th>Total Quantity</th><th>Total Inventory Value</th><th>Sales Revenue</th></tr></thead><tbody id="storeroom-report-body"></tbody></table></div></div></div>
+        </section>
+
+        <!-- 17. HISTORY -->
+        <section id="view-history" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>📜 Complete Inventory Audit Ledger</h2><p>Immutable history log of every stock transaction, sale, transfer, and adjustment</p></div><button class="btn btn-outline" onclick="App.exportToCSV('inventory-audit-history', 'history-table')">📥 Export Audit Log CSV</button></div>
+          <div class="card"><div class="card-body p0"><div class="table-wrapper"><table class="table" id="history-table"><thead><tr><th>Timestamp</th><th>Product</th><th>Storeroom</th><th>Tx Type</th><th>Qty Change</th><th>Before → After</th><th>User</th><th>Reference & Notes</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div>
+        </section>
+
+        <!-- 18. USERS -->
+        <section id="view-users" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>👥 User & Role Access Management</h2><p>Manage Admin and Staff accounts with role-based permissions</p></div><button class="btn btn-primary" onclick="App.openModal('modal-user')">➕ Create User Account</button></div>
+          <div class="card"><div class="card-body p0"><div class="table-wrapper"><table class="table"><thead><tr><th>User Name</th><th>Email Address</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody id="users-table-body"></tbody></table></div></div></div>
+        </section>
+
+        <!-- 19. SETTINGS -->
+        <section id="view-settings" class="view-panel" style="display: none;">
+          <div class="page-header"><div><h2>⚙️ System Settings & Supabase Configuration</h2><p>Connect Supabase cloud backend database credentials</p></div></div>
+          <div class="card" style="max-width: 650px;">
+            <div class="card-header"><h3>⚡ Supabase Database Connection Settings</h3></div>
+            <div class="card-body">
+              <form onsubmit="App.saveSettings(event)">
+                <div class="form-group"><label class="form-label">Supabase Project URL</label><input type="text" id="setting-supabase-url" class="form-control" placeholder="https://your-project.supabase.co"></div>
+                <div class="form-group"><label class="form-label">Supabase Anon Key</label><input type="password" id="setting-supabase-key" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..."></div>
+                <button type="submit" class="btn btn-primary">💾 Save Database Credentials</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODALS -->
+  <div id="modal-product" class="modal-backdrop">
+    <div class="modal modal-lg">
+      <div class="modal-header"><h3 id="modal-product-title">➕ Add New Product</h3><button class="modal-close" onclick="App.closeModal('modal-product')">✕</button></div>
+      <div class="modal-body">
+        <form id="product-form" onsubmit="App.saveProduct(event)">
+          <input type="hidden" id="prod-form-id">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Product Name <span class="required">*</span></label><input type="text" id="prod-form-name" class="form-control" required></div>
+            <div class="form-group"><label class="form-label">Category <span class="required">*</span></label><select id="prod-form-category" class="form-control" required></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Brand</label><input type="text" id="prod-form-brand" class="form-control"></div>
+            <div class="form-group"><label class="form-label">Type</label><input type="text" id="prod-form-type" class="form-control"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Unit</label><select id="prod-form-unit" class="form-control"><option value="Bag">Bag</option><option value="Kg">Kg</option><option value="Litre">Litre</option><option value="Packet">Packet</option></select></div>
+            <div class="form-group"><label class="form-label">Pack Size</label><input type="text" id="prod-form-pack" class="form-control"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Buy Price (₹)</label><input type="number" id="prod-form-pprice" class="form-control" required></div>
+            <div class="form-group"><label class="form-label">Sell Price (₹)</label><input type="number" id="prod-form-sprice" class="form-control" required></div>
+            <div class="form-group"><label class="form-label">Min Stock</label><input type="number" id="prod-form-minstock" class="form-control" value="10"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Supplier</label><select id="prod-form-supplier" class="form-control"></select></div>
+            <div class="form-group"><label class="form-label">Batch No</label><input type="text" id="prod-form-batch" class="form-control"></div>
+            <div class="form-group"><label class="form-label">Expiry Date</label><input type="date" id="prod-form-expiry" class="form-control"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Description</label><textarea id="prod-form-desc" class="form-control" rows="2"></textarea></div>
+          <div class="divider"></div>
+          <h4 class="mb-16">🏬 Initial Stock per Storeroom</h4>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Storeroom 1</label><input type="number" id="prod-init-sr1" class="form-control" value="0"></div>
+            <div class="form-group"><label class="form-label">Storeroom 2</label><input type="number" id="prod-init-sr2" class="form-control" value="0"></div>
+            <div class="form-group"><label class="form-label">Storeroom 3</label><input type="number" id="prod-init-sr3" class="form-control" value="0"></div>
+          </div>
+          <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="App.closeModal('modal-product')">Cancel</button><button type="submit" class="btn btn-primary">💾 Save Product</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-supplier" class="modal-backdrop">
+    <div class="modal modal-md">
+      <div class="modal-header"><h3>➕ Add Supplier</h3><button class="modal-close" onclick="App.closeModal('modal-supplier')">✕</button></div>
+      <div class="modal-body">
+        <form onsubmit="App.saveSupplier(event)">
+          <div class="form-group"><label class="form-label">Supplier Name <span class="required">*</span></label><input type="text" id="sup-form-name" class="form-control" required></div>
+          <div class="form-group"><label class="form-label">Phone</label><input type="text" id="sup-form-phone" class="form-control"></div>
+          <div class="form-group"><label class="form-label">Email</label><input type="email" id="sup-form-email" class="form-control"></div>
+          <div class="form-group"><label class="form-label">Address</label><textarea id="sup-form-address" class="form-control" rows="2"></textarea></div>
+          <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="App.closeModal('modal-supplier')">Cancel</button><button type="submit" class="btn btn-primary">Save Supplier</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-user" class="modal-backdrop">
+    <div class="modal modal-md">
+      <div class="modal-header"><h3>👥 Create User Account</h3><button class="modal-close" onclick="App.closeModal('modal-user')">✕</button></div>
+      <div class="modal-body">
+        <form onsubmit="App.saveUser(event)">
+          <div class="form-group"><label class="form-label">Full Name <span class="required">*</span></label><input type="text" id="user-form-name" class="form-control" required></div>
+          <div class="form-group"><label class="form-label">Email Address <span class="required">*</span></label><input type="email" id="user-form-email" class="form-control" required></div>
+          <div class="form-group"><label class="form-label">Password <span class="required">*</span></label><input type="password" id="user-form-password" class="form-control" required></div>
+          <div class="form-group"><label class="form-label">Role</label><select id="user-form-role" class="form-control"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+          <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="App.closeModal('modal-user')">Cancel</button><button type="submit" class="btn btn-primary">Create User</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALL JAVASCRIPT LOGIC EMBEDDED IN ONE SCRIPT -->
+  <script>
+/**
+ * DB Layer (localStorage)
+ */
+const DB = (() => {
+  const read  = (k) => JSON.parse(localStorage.getItem(k) || '[]');
+  const write = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+  const uid   = () => 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  const now   = () => new Date().toISOString();
+
+  function seed() {
+    if (localStorage.getItem('_seeded')) return;
+
+    write('users', [
+      { id:'u1', name:'Admin User', email:'admin@agrishop.com', password:'admin123', role:'admin', status:'active', createdAt: now() },
+      { id:'u2', name:'Staff User', email:'staff@agrishop.com', password:'staff123', role:'staff', status:'active', createdAt: now() },
+    ]);
+
+    write('storerooms', [
+      { id:'sr1', name:'Main Store',   code:'SR1', location:'Main Building', status:'active' },
+      { id:'sr2', name:'Store Room 2', code:'SR2', location:'Block B',       status:'active' },
+      { id:'sr3', name:'Store Room 3', code:'SR3', location:'Block C',       status:'active' },
+    ]);
+
+    write('categories', [
+      { id:'cat1', name:'Fertilizers' },
+      { id:'cat2', name:'Pesticides'  },
+      { id:'cat3', name:'Seeds'       },
+      { id:'cat4', name:'Other Agriculture Products' },
+    ]);
+
+    write('suppliers', [
+      { id:'sup1', name:'AgroWorld Pvt Ltd', phone:'9876543210', email:'info@agroworld.com', address:'Industrial Area, City', status:'active' },
+      { id:'sup2', name:'FarmSupply Co.',    phone:'9123456789', email:'sales@farmsupply.com', address:'Market Road, Town', status:'active' },
+      { id:'sup3', name:'GreenLeaf Seeds',   phone:'9988776655', email:'gl@greenleaf.com', address:'Seed Street, Village', status:'active' },
+    ]);
+
+    const products = [
+      { id:'p1',  name:'Urea',            categoryId:'cat1', brand:'IFFCO',      type:'Granular', unit:'Bag',    packSize:'50 kg',  purchasePrice:900,  sellingPrice:1050, minStock:20, supplierId:'sup1', description:'Nitrogen fertilizer', status:'active', batchNo:'', expiryDate:'' },
+      { id:'p2',  name:'DAP',             categoryId:'cat1', brand:'IFFCO',      type:'Granular', unit:'Bag',    packSize:'50 kg',  purchasePrice:1400, sellingPrice:1600, minStock:15, supplierId:'sup1', description:'Di-ammonium phosphate', status:'active', batchNo:'', expiryDate:'' },
+      { id:'p3',  name:'10:26:26 NPK',    categoryId:'cat1', brand:'Coromandel', type:'Granular', unit:'Bag',    packSize:'50 kg',  purchasePrice:1300, sellingPrice:1500, minStock:10, supplierId:'sup1', description:'NPK complex fertilizer', status:'active', batchNo:'', expiryDate:'' },
+      { id:'p4',  name:'Potash',          categoryId:'cat1', brand:'SQM',        type:'Granular', unit:'Bag',    packSize:'50 kg',  purchasePrice:1100, sellingPrice:1300, minStock:10, supplierId:'sup2', description:'Muriate of potash', status:'active', batchNo:'', expiryDate:'' },
+      { id:'p5',  name:'Zinc Sulphate',   categoryId:'cat1', brand:'Various',    type:'Powder',   unit:'Kg',     packSize:'1 kg',   purchasePrice:80,   sellingPrice:100,  minStock:50, supplierId:'sup2', description:'Micronutrient zinc supplement', status:'active', batchNo:'', expiryDate:'' },
+      { id:'p6',  name:'Chlorpyrifos',    categoryId:'cat2', brand:'Dhanuka',    type:'Liquid',   unit:'Litre',  packSize:'500 ml', purchasePrice:350,  sellingPrice:420,  minStock:30, supplierId:'sup2', description:'Insecticide', status:'active', expiryDate:'2026-12-31', batchNo:'BT2024A' },
+      { id:'p7',  name:'Mancozeb',        categoryId:'cat2', brand:'Indofil',    type:'Powder',   unit:'Kg',     packSize:'1 kg',   purchasePrice:280,  sellingPrice:350,  minStock:25, supplierId:'sup2', description:'Fungicide', status:'active', expiryDate:'2026-06-30', batchNo:'BT2024B' },
+      { id:'p8',  name:'Glyphosate',      categoryId:'cat2', brand:'Bayer',      type:'Liquid',   unit:'Litre',  packSize:'1 L',    purchasePrice:450,  sellingPrice:550,  minStock:20, supplierId:'sup2', description:'Herbicide', status:'active', expiryDate:'2027-03-31', batchNo:'BT2024C' },
+      { id:'p9',  name:'Tomato Seeds',    categoryId:'cat3', brand:'Syngenta',   type:'Hybrid',   unit:'Packet', packSize:'10 g',   purchasePrice:150,  sellingPrice:200,  minStock:40, supplierId:'sup3', description:'Hybrid tomato variety', status:'active', expiryDate:'2025-12-31', batchNo:'TS2024' },
+      { id:'p10', name:'Onion Seeds',     categoryId:'cat3', brand:'East West',  type:'Hybrid',   unit:'Packet', packSize:'50 g',   purchasePrice:120,  sellingPrice:160,  minStock:40, supplierId:'sup3', description:'Hybrid onion variety', status:'active', expiryDate:'2025-10-31', batchNo:'OS2024' },
+    ];
+    write('products', products);
+
+    const stockData = [
+      {id:'s1',  productId:'p1',  storeroomId:'sr1', qty:100}, {id:'s2',  productId:'p1',  storeroomId:'sr2', qty:75},  {id:'s3',  productId:'p1',  storeroomId:'sr3', qty:50},
+      {id:'s4',  productId:'p2',  storeroomId:'sr1', qty:60},  {id:'s5',  productId:'p2',  storeroomId:'sr2', qty:8},   {id:'s6',  productId:'p2',  storeroomId:'sr3', qty:30},
+      {id:'s7',  productId:'p3',  storeroomId:'sr1', qty:45},  {id:'s8',  productId:'p3',  storeroomId:'sr2', qty:20},  {id:'s9',  productId:'p3',  storeroomId:'sr3', qty:15},
+      {id:'s10', productId:'p4',  storeroomId:'sr1', qty:30},  {id:'s11', productId:'p4',  storeroomId:'sr2', qty:25},  {id:'s12', productId:'p4',  storeroomId:'sr3', qty:12},
+      {id:'s13', productId:'p5',  storeroomId:'sr1', qty:200}, {id:'s14', productId:'p5',  storeroomId:'sr2', qty:150}, {id:'s15', productId:'p5',  storeroomId:'sr3', qty:100},
+      {id:'s16', productId:'p6',  storeroomId:'sr1', qty:50},  {id:'s17', productId:'p6',  storeroomId:'sr2', qty:35},  {id:'s18', productId:'p6',  storeroomId:'sr3', qty:20},
+      {id:'s19', productId:'p7',  storeroomId:'sr1', qty:40},  {id:'s20', productId:'p7',  storeroomId:'sr2', qty:30},  {id:'s21', productId:'p7',  storeroomId:'sr3', qty:10},
+      {id:'s22', productId:'p8',  storeroomId:'sr1', qty:25},  {id:'s23', productId:'p8',  storeroomId:'sr2', qty:18},  {id:'s24', productId:'p8',  storeroomId:'sr3', qty:0},
+      {id:'s25', productId:'p9',  storeroomId:'sr1', qty:80},  {id:'s26', productId:'p9',  storeroomId:'sr2', qty:60},  {id:'s27', productId:'p9',  storeroomId:'sr3', qty:40},
+      {id:'s28', productId:'p10', storeroomId:'sr1', qty:70},  {id:'s29', productId:'p10', storeroomId:'sr2', qty:50},  {id:'s30', productId:'p10', storeroomId:'sr3', qty:35},
+    ];
+    write('stock', stockData);
+
+    const sales = [];
+    const saleItems = [];
+    const today = new Date();
+    for (let d = 29; d >= 0; d--) {
+      const dt = new Date(today); dt.setDate(dt.getDate() - d);
+      const dateStr = dt.toISOString().split('T')[0];
+      const saleId = 'sale_' + d;
+      const pid = ['p1','p2','p3','p4','p5'][d % 5];
+      const qty = Math.floor(Math.random()*10)+1;
+      const prod = products.find(p=>p.id===pid);
+      const sr = ['sr1','sr2','sr3'][d%3];
+      sales.push({ id: saleId, date: dateStr, storeroomId: sr, invoiceNo:'INV-'+String(1000+d).padStart(4,'0'), customer:'', phone:'', paymentMethod:'Cash', staffId:'u1', notes:'', total: prod.sellingPrice*qty, createdAt: dt.toISOString() });
+      saleItems.push({ id:'si_'+d, saleId, productId: pid, qty, price: prod.sellingPrice, subtotal: prod.sellingPrice*qty });
+    }
+    write('sales', sales);
+    write('saleItems', saleItems);
+
+    write('purchases', [
+      { id:'pur1', date:'2026-09-01', supplierId:'sup1', invoiceNo:'PINV-001', storeroomId:'sr1', notes:'', total:45000, createdAt: now() },
+      { id:'pur2', date:'2026-09-10', supplierId:'sup2', invoiceNo:'PINV-002', storeroomId:'sr2', notes:'', total:28000, createdAt: now() },
+    ]);
+    write('purchaseItems', [
+      { id:'pi1', purchaseId:'pur1', productId:'p1', qty:50, price:900, batchNo:'', expiryDate:'', subtotal:45000 },
+      { id:'pi2', purchaseId:'pur2', productId:'p6', qty:40, price:350, batchNo:'BT2024A', expiryDate:'2026-12-31', subtotal:14000 },
+    ]);
+
+    write('transfers', [
+      { id:'tr1', date:'2026-09-05', fromStoreroomId:'sr1', toStoreroomId:'sr2', productId:'p1', qty:20, staffId:'u1', notes:'', createdAt: now() },
+    ]);
+
+    write('adjustments', [
+      { id:'adj1', date:'2026-09-08', storeroomId:'sr1', productId:'p6', qty:-5, reason:'Damaged', staffId:'u1', notes:'Broken bottles', createdAt: now() },
+    ]);
+
+    write('invHistory', []);
+    localStorage.setItem('_seeded', '1');
+  }
+
+  const table = (name) => ({
+    all:    ()       => read(name),
+    find:   (id)     => read(name).find(r => r.id === id),
+    where:  (fn)     => read(name).filter(fn),
+    insert: (data)   => { const rows = read(name); const row = { id: uid(), createdAt: now(), ...data }; rows.push(row); write(name, rows); return row; },
+    update: (id, d)  => { const rows = read(name).map(r => r.id===id ? {...r,...d, updatedAt:now()} : r); write(name, rows); return rows.find(r=>r.id===id); },
+    remove: (id)     => { write(name, read(name).filter(r => r.id !== id)); },
+    removeWhere: (fn)=> { write(name, read(name).filter(r => !fn(r))); },
+  });
+
+  function getStock(productId, storeroomId) {
+    const s = read('stock').find(r => r.productId===productId && r.storeroomId===storeroomId);
+    return s ? s.qty : 0;
+  }
+
+  function adjustStock(productId, storeroomId, delta, txType, ref, userId, notes='') {
+    const stocks = read('stock');
+    const idx = stocks.findIndex(r => r.productId===productId && r.storeroomId===storeroomId);
+    const prev = idx >= 0 ? stocks[idx].qty : 0;
+    const newQty = prev + delta;
+    if (idx >= 0) { stocks[idx].qty = newQty; stocks[idx].updatedAt = now(); }
+    else { stocks.push({ id: uid(), productId, storeroomId, qty: newQty, updatedAt: now() }); }
+    write('stock', stocks);
+    const hist = read('invHistory');
+    hist.unshift({ id:uid(), date:new Date().toISOString().split('T')[0], time:new Date().toTimeString().slice(0,8), productId, storeroomId, txType, qty:Math.abs(delta), direction: delta>=0?'+':'-', prevQty:prev, newQty, userId, ref, notes, createdAt:now() });
+    write('invHistory', hist);
+    return newQty;
+  }
+
+  return { seed, table, uid, now, getStock, adjustStock };
+})();
+
+/**
+ * Main App Controller
+ */
+const App = {
+  currentUser: null,
+  currentView: 'dashboard',
+  charts: {},
+
+  init() {
+    DB.seed();
+    this.checkAuth();
+    this.bindEvents();
+    this.updateNotificationBadges();
+  },
+
+  checkAuth() {
+    const savedUser = localStorage.getItem('agri_user');
+    if (savedUser) {
+      this.currentUser = JSON.parse(savedUser);
+      this.showApp();
+    } else {
+      this.showLogin();
+    }
+  },
+
+  login(email, password) {
+    const users = DB.table('users').all();
+    const user = users.find(u => u.email === email && u.password === password);
+    if (user) {
+      if (user.status !== 'active') {
+        App.showToast('Account is inactive. Contact Admin.', 'error');
+        return false;
+      }
+      this.currentUser = user;
+      localStorage.setItem('agri_user', JSON.stringify(user));
+      this.showApp();
+      App.showToast(`Welcome back, ${user.name}!`, 'success');
+      return true;
+    } else {
+      App.showToast('Invalid email or password', 'error');
+      return false;
+    }
+  },
+
+  logout() {
+    this.currentUser = null;
+    localStorage.removeItem('agri_user');
+    this.showLogin();
+    App.showToast('Logged out successfully', 'info');
+  },
+
+  showLogin() {
+    document.getElementById('login-view').style.display = 'flex';
+    document.getElementById('app-view').style.display = 'none';
+  },
+
+  showApp() {
+    document.getElementById('login-view').style.display = 'none';
+    document.getElementById('app-view').style.display = 'flex';
+    
+    document.getElementById('user-display-name').textContent = this.currentUser.name;
+    document.getElementById('user-display-role').textContent = this.currentUser.role.toUpperCase();
+    document.getElementById('user-avatar-initial').textContent = this.currentUser.name.charAt(0).toUpperCase();
+
+    this.applyRolePermissions();
+    this.navigateTo(this.currentView);
+  },
+
+  applyRolePermissions() {
+    const isAdmin = this.currentUser.role === 'admin';
+    document.querySelectorAll('.admin-only').forEach(el => {
+      el.style.display = isAdmin ? '' : 'none';
+    });
+  },
+
+  bindEvents() {
+    const menuBtn = document.getElementById('menu-toggle-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (menuBtn) {
+      menuBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+      });
+    }
+    if (overlay) {
+      overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.style.display = 'none';
+      });
+    }
+
+    document.querySelectorAll('[data-view]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const view = link.getAttribute('data-view');
+        this.navigateTo(view);
+        if (window.innerWidth <= 900) {
+          sidebar.classList.remove('open');
+          if (overlay) overlay.style.display = 'none';
+        }
+      });
+    });
+
+    document.querySelectorAll('.nav-group-toggle').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        toggle.classList.toggle('open');
+        const submenu = toggle.nextElementSibling;
+        if (submenu) submenu.classList.toggle('open');
+      });
+    });
+  },
+
+  navigateTo(viewId, params = {}) {
+    this.currentView = viewId;
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    const activeLink = document.querySelector(`[data-view="${viewId}"]`);
+    if (activeLink) activeLink.classList.add('active');
+
+    document.querySelectorAll('.view-panel').forEach(panel => panel.style.display = 'none');
+
+    const targetPanel = document.getElementById(`view-${viewId}`);
+    if (targetPanel) targetPanel.style.display = 'block';
+
+    const titleMap = {
+      dashboard: '📊 Executive Dashboard',
+      products: '📦 Product Catalog & Inventory',
+      storerooms: '🏪 Storerooms Overview',
+      'daily-update': '📝 Daily Stock Update',
+      sales: '💰 Sales Management',
+      purchases: '📥 Purchase / Stock In',
+      transfers: '🔄 Stock Transfer',
+      adjustments: '⚠️ Stock Adjustments',
+      suppliers: '🤝 Supplier Management',
+      'low-stock': '⚠️ Low Stock & Out of Stock Alerts',
+      'expiry-alerts': '⏳ Expiry Date Tracker',
+      'daily-report': '📄 Daily Inventory Report',
+      'monthly-report': '📅 Monthly Performance Report',
+      'yearly-report': '📊 Yearly Financial Report',
+      'product-report': '📦 Product-Wise Sales Report',
+      'storeroom-report': '🏢 Storeroom Comparison Report',
+      history: '📜 Inventory Audit Ledger',
+      users: '👥 User Access Control',
+      settings: '⚙️ Settings & Supabase Setup'
+    };
+    document.getElementById('page-title').textContent = titleMap[viewId] || 'AgriShop Inventory';
+
+    this.renderView(viewId, params);
+  },
+
+  renderView(viewId, params) {
+    switch (viewId) {
+      case 'dashboard': this.renderDashboard(); break;
+      case 'products': this.renderProducts(); break;
+      case 'storerooms': this.renderStorerooms(); break;
+      case 'daily-update': this.renderDailyUpdate(); break;
+      case 'sales': this.renderSales(); break;
+      case 'purchases': this.renderPurchases(); break;
+      case 'transfers': this.renderTransfers(); break;
+      case 'adjustments': this.renderAdjustments(); break;
+      case 'suppliers': this.renderSuppliers(); break;
+      case 'low-stock': this.renderLowStock(); break;
+      case 'expiry-alerts': this.renderExpiryAlerts(); break;
+      case 'daily-report': this.renderDailyReport(); break;
+      case 'monthly-report': this.renderMonthlyReport(); break;
+      case 'yearly-report': this.renderYearlyReport(); break;
+      case 'product-report': this.renderProductReport(); break;
+      case 'storeroom-report': this.renderStoreroomReport(); break;
+      case 'history': this.renderHistory(); break;
+      case 'users': this.renderUsers(); break;
+      case 'settings': this.renderSettings(); break;
+    }
+  },
+
+  updateNotificationBadges() {
+    const products = DB.table('products').all();
+    const stocks = DB.table('stock').all();
+    let lowCount = 0;
+    products.forEach(p => {
+      const totalQty = stocks.filter(s => s.productId === p.id).reduce((sum, s) => sum + s.qty, 0);
+      if (totalQty <= p.minStock) lowCount++;
+    });
+
+    const today = new Date();
+    const sixtyDaysLater = new Date();
+    sixtyDaysLater.setDate(today.getDate() + 60);
+
+    let expCount = 0;
+    products.forEach(p => {
+      if (p.expiryDate) {
+        const exp = new Date(p.expiryDate);
+        if (exp <= sixtyDaysLater) expCount++;
+      }
+    });
+
+    const lowBadge = document.getElementById('badge-low-stock');
+    if (lowBadge) { lowBadge.textContent = lowCount; lowBadge.style.display = lowCount > 0 ? 'inline-block' : 'none'; }
+    const expBadge = document.getElementById('badge-expiry');
+    if (expBadge) { expBadge.textContent = expCount; expBadge.style.display = expCount > 0 ? 'inline-block' : 'none'; }
+  },
+
+  renderDashboard() {
+    const products = DB.table('products').all();
+    const stocks = DB.table('stock').all();
+    const sales = DB.table('sales').all();
+    const storerooms = DB.table('storerooms').all();
+
+    const totalProducts = products.length;
+    let totalStockQty = 0;
+    let totalStockValue = 0;
+
+    products.forEach(p => {
+      const prodStock = stocks.filter(s => s.productId === p.id).reduce((sum, s) => sum + s.qty, 0);
+      totalStockQty += prodStock;
+      totalStockValue += (prodStock * p.purchasePrice);
+    });
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const currentMonth = todayStr.slice(0, 7);
+    const currentYear = todayStr.slice(0, 4);
+
+    const todaySales = sales.filter(s => s.date === todayStr).reduce((sum, s) => sum + s.total, 0);
+    const monthSales = sales.filter(s => s.date && s.date.startsWith(currentMonth)).reduce((sum, s) => sum + s.total, 0);
+    const yearSales = sales.filter(s => s.date && s.date.startsWith(currentYear)).reduce((sum, s) => sum + s.total, 0);
+
+    let lowStockCount = 0;
+    let outOfStockCount = 0;
+
+    products.forEach(p => {
+      const qty = stocks.filter(s => s.productId === p.id).reduce((sum, s) => sum + s.qty, 0);
+      if (qty === 0) outOfStockCount++;
+      else if (qty <= p.minStock) lowStockCount++;
+    });
+
+    document.getElementById('dash-total-products').textContent = totalProducts;
+    document.getElementById('dash-total-qty').textContent = totalStockQty.toLocaleString();
+    document.getElementById('dash-total-val').textContent = '₹' + totalStockValue.toLocaleString('en-IN');
+    document.getElementById('dash-today-sales').textContent = '₹' + todaySales.toLocaleString('en-IN');
+    document.getElementById('dash-month-sales').textContent = '₹' + monthSales.toLocaleString('en-IN');
+    document.getElementById('dash-year-sales').textContent = '₹' + yearSales.toLocaleString('en-IN');
+    document.getElementById('dash-low-stock').textContent = lowStockCount;
+    document.getElementById('dash-out-stock').textContent = outOfStockCount;
+
+    const srGrid = document.getElementById('dash-storeroom-grid');
+    if (srGrid) {
+      srGrid.innerHTML = storerooms.map((sr, idx) => {
+        const srStocks = stocks.filter(s => s.storeroomId === sr.id);
+        const srQty = srStocks.reduce((sum, s) => sum + s.qty, 0);
+        let srVal = 0;
+        srStocks.forEach(s => {
+          const p = products.find(prod => prod.id === s.productId);
+          if (p) srVal += (s.qty * p.purchasePrice);
+        });
+        const activeProds = srStocks.filter(s => s.qty > 0).length;
+
+        return `
+          <div class="storeroom-card">
+            <div class="sr-header">
+              <div class="sr-icon sr${idx + 1}">🏪</div>
+              <div>
+                <div class="sr-name">${sr.name}</div>
+                <div class="sr-code">${sr.code} • ${sr.location}</div>
+              </div>
+            </div>
+            <div class="sr-stats">
+              <div class="sr-stat"><div class="sr-stat-val">${activeProds}</div><div class="sr-stat-lbl">Products</div></div>
+              <div class="sr-stat"><div class="sr-stat-val">${srQty.toLocaleString()}</div><div class="sr-stat-lbl">Quantity</div></div>
+              <div class="sr-stat"><div class="sr-stat-val">₹${(srVal/1000).toFixed(1)}k</div><div class="sr-stat-lbl">Value</div></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    const recentSalesTable = document.getElementById('dash-recent-sales');
+    if (recentSalesTable) {
+      const recentSales = sales.slice().sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+      recentSalesTable.innerHTML = recentSales.length === 0 ? `<tr><td colspan="5" class="text-center">No recent sales</td></tr>` :
+        recentSales.map(s => `
+          <tr>
+            <td><strong>${s.invoiceNo}</strong></td>
+            <td>${s.date}</td>
+            <td><span class="tag">${s.storeroomId}</span></td>
+            <td>${s.paymentMethod}</td>
+            <td class="fw-700 text-green">₹${s.total.toLocaleString('en-IN')}</td>
+          </tr>
+        `).join('');
+    }
+
+    const recentHistoryTable = document.getElementById('dash-recent-updates');
+    if (recentHistoryTable) {
+      const history = DB.table('invHistory').all().slice(0, 5);
+      recentHistoryTable.innerHTML = history.length === 0 ? `<tr><td colspan="5" class="text-center">No recent updates</td></tr>` :
+        history.map(h => {
+          const p = products.find(prod => prod.id === h.productId);
+          return `
+            <tr>
+              <td>${h.date} ${h.time}</td>
+              <td><strong>${p ? p.name : 'Product'}</strong></td>
+              <td>${h.storeroomId}</td>
+              <td><span class="badge ${h.direction==='+'?'badge-success':'badge-danger'}">${h.txType}</span></td>
+              <td>${h.prevQty} → <strong>${h.newQty}</strong></td>
+            </tr>
+          `;
+        }).join('');
+    }
+
+    if (window.Chart) this.renderDashboardCharts(sales, storerooms, products, stocks);
+  },
+
+  renderDashboardCharts(sales, storerooms, products, stocks) {
+    const ctxSales = document.getElementById('chart-dash-sales');
+    if (ctxSales) {
+      const dates = [], totals = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        dates.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+        totals.push(sales.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.total, 0));
+      }
+
+      if (this.charts.dashSales) this.charts.dashSales.destroy();
+      this.charts.dashSales = new Chart(ctxSales, {
+        type: 'line',
+        data: { labels: dates, datasets: [{ label: 'Sales (₹)', data: totals, borderColor: '#2d6a4f', backgroundColor: 'rgba(45, 106, 79, 0.1)', fill: true, tension: 0.3 }] },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
+    const ctxSr = document.getElementById('chart-dash-storerooms');
+    if (ctxSr) {
+      const labels = storerooms.map(sr => sr.name);
+      const values = storerooms.map(sr => {
+        const srStocks = stocks.filter(s => s.storeroomId === sr.id);
+        return srStocks.reduce((sum, s) => {
+          const p = products.find(prod => prod.id === s.productId);
+          return sum + (s.qty * (p ? p.purchasePrice : 0));
+        }, 0);
+      });
+
+      if (this.charts.dashSr) this.charts.dashSr.destroy();
+      this.charts.dashSr = new Chart(ctxSr, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data: values, backgroundColor: ['#2d6a4f', '#2563eb', '#f0a500'] }] },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+  },
+
+  renderProducts() {
+    const products = DB.table('products').all();
+    const categories = DB.table('categories').all();
+    const searchInput = document.getElementById('product-search-input');
+    const catFilter = document.getElementById('product-cat-filter');
+    const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const catVal = catFilter ? catFilter.value : '';
+
+    let filtered = products.filter(p => {
+      const matchSearch = p.name.toLowerCase().includes(searchVal) || p.id.toLowerCase().includes(searchVal);
+      const matchCat = !catVal || p.categoryId === catVal;
+      return matchSearch && matchCat;
+    });
+
+    const tableBody = document.getElementById('products-table-body');
+    if (tableBody) {
+      tableBody.innerHTML = filtered.map(p => {
+        const cat = categories.find(c => c.id === p.categoryId);
+        const s1 = DB.getStock(p.id, 'sr1'), s2 = DB.getStock(p.id, 'sr2'), s3 = DB.getStock(p.id, 'sr3');
+        const totalStock = s1 + s2 + s3;
+        let badge = '<span class="badge badge-success">In Stock</span>';
+        if (totalStock === 0) badge = '<span class="badge badge-danger">Out of Stock</span>';
+        else if (totalStock <= p.minStock) badge = '<span class="badge badge-warning">Low Stock</span>';
+        const isAdmin = this.currentUser.role === 'admin';
+
+        return `
+          <tr>
+            <td><strong>${p.id}</strong></td>
+            <td><strong>${p.name}</strong> <span class="fs-xs text-muted">(${p.brand || ''})</span></td>
+            <td><span class="tag">${cat ? cat.name : 'Uncategorized'}</span></td>
+            <td>₹${p.purchasePrice}</td>
+            <td class="fw-700 text-green">₹${p.sellingPrice}</td>
+            <td>SR1:${s1} | SR2:${s2} | SR3:${s3}<br/><strong>${totalStock} ${p.unit}s</strong></td>
+            <td>${p.minStock}</td>
+            <td>${badge}</td>
+            <td>${p.expiryDate || 'N/A'}</td>
+            <td>${isAdmin ? `<button class="btn btn-secondary btn-sm" onclick="App.openEditProductModal('${p.id}')">✏️</button> <button class="btn btn-danger btn-sm" onclick="App.deleteProduct('${p.id}')">🗑️</button>` : 'Read-Only'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+  },
+
+  openAddProductModal() {
+    const categories = DB.table('categories').all();
+    document.getElementById('prod-form-category').innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    document.getElementById('prod-form-id').value = '';
+    document.getElementById('product-form').reset();
+    App.openModal('modal-product');
+  },
+
+  openEditProductModal(productId) {
+    const p = DB.table('products').find(productId);
+    if (!p) return;
+    this.openAddProductModal();
+    document.getElementById('prod-form-id').value = p.id;
+    document.getElementById('prod-form-name').value = p.name;
+    document.getElementById('prod-form-category').value = p.categoryId;
+    document.getElementById('prod-form-pprice').value = p.purchasePrice;
+    document.getElementById('prod-form-sprice').value = p.sellingPrice;
+    document.getElementById('prod-form-minstock').value = p.minStock;
+    document.getElementById('prod-init-sr1').value = DB.getStock(p.id, 'sr1');
+    document.getElementById('prod-init-sr2').value = DB.getStock(p.id, 'sr2');
+    document.getElementById('prod-init-sr3').value = DB.getStock(p.id, 'sr3');
+  },
+
+  saveProduct(e) {
+    e.preventDefault();
+    const id = document.getElementById('prod-form-id').value;
+    const name = document.getElementById('prod-form-name').value.trim();
+    const categoryId = document.getElementById('prod-form-category').value;
+    const purchasePrice = parseFloat(document.getElementById('prod-form-pprice').value) || 0;
+    const sellingPrice = parseFloat(document.getElementById('prod-form-sprice').value) || 0;
+    const minStock = parseInt(document.getElementById('prod-form-minstock').value) || 0;
+    const sr1Qty = parseInt(document.getElementById('prod-init-sr1').value) || 0;
+    const sr2Qty = parseInt(document.getElementById('prod-init-sr2').value) || 0;
+    const sr3Qty = parseInt(document.getElementById('prod-init-sr3').value) || 0;
+
+    if (id) {
+      DB.table('products').update(id, { name, categoryId, purchasePrice, sellingPrice, minStock });
+      const c1 = DB.getStock(id, 'sr1'), c2 = DB.getStock(id, 'sr2'), c3 = DB.getStock(id, 'sr3');
+      if (sr1Qty !== c1) DB.adjustStock(id, 'sr1', sr1Qty - c1, 'Stock Adjustment', 'MANUAL_EDIT', App.currentUser.id, 'Manual edit');
+      if (sr2Qty !== c2) DB.adjustStock(id, 'sr2', sr2Qty - c2, 'Stock Adjustment', 'MANUAL_EDIT', App.currentUser.id, 'Manual edit');
+      if (sr3Qty !== c3) DB.adjustStock(id, 'sr3', sr3Qty - c3, 'Stock Adjustment', 'MANUAL_EDIT', App.currentUser.id, 'Manual edit');
+      App.showToast('Product updated!', 'success');
+    } else {
+      const p = DB.table('products').insert({ name, categoryId, purchasePrice, sellingPrice, minStock, unit:'Bag', status:'active' });
+      if (sr1Qty > 0) DB.adjustStock(p.id, 'sr1', sr1Qty, 'Initial Stock', 'NEW_PROD', App.currentUser.id);
+      if (sr2Qty > 0) DB.adjustStock(p.id, 'sr2', sr2Qty, 'Initial Stock', 'NEW_PROD', App.currentUser.id);
+      if (sr3Qty > 0) DB.adjustStock(p.id, 'sr3', sr3Qty, 'Initial Stock', 'NEW_PROD', App.currentUser.id);
+      App.showToast('Product added!', 'success');
+    }
+    App.closeModal('modal-product');
+    App.renderProducts();
+  },
+
+  deleteProduct(productId) {
+    if (confirm('Delete product?')) {
+      DB.table('products').remove(productId);
+      App.showToast('Product deleted', 'info');
+      App.renderProducts();
+    }
+  },
+
+  renderStorerooms() {
+    const storerooms = DB.table('storerooms').all();
+    const products = DB.table('products').all();
+    const selectedSrId = document.getElementById('storeroom-select-filter')?.value || 'sr1';
+
+    document.getElementById('storeroom-tabs').innerHTML = storerooms.map(sr => `
+      <button class="tab-btn ${sr.id === selectedSrId ? 'active' : ''}" onclick="App.selectStoreroom('${sr.id}')">🏪 ${sr.name}</button>
+    `).join('');
+
+    const body = document.getElementById('storeroom-stock-table');
+    if (body) {
+      body.innerHTML = products.map(p => {
+        const qty = DB.getStock(p.id, selectedSrId);
+        return `<tr><td>${p.id}</td><td><strong>${p.name}</strong></td><td>${p.unit}</td><td class="fw-700">${qty}</td><td>₹${p.purchasePrice}</td><td class="text-green fw-700">₹${(qty * p.purchasePrice).toLocaleString('en-IN')}</td><td>${qty<=p.minStock?'<span class="badge badge-warning">Low Stock</span>':'<span class="badge badge-success">OK</span>'}</td></tr>`;
+      }).join('');
+    }
+  },
+
+  selectStoreroom(srId) {
+    document.getElementById('storeroom-select-filter').value = srId;
+    this.renderStorerooms();
+  },
+
+  renderDailyUpdate() {
+    const dateInput = document.getElementById('daily-update-date');
+    if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+    const products = DB.table('products').all();
+    const storerooms = DB.table('storerooms').all();
+
+    const pSel = document.getElementById('daily-update-product');
+    const sSel = document.getElementById('daily-update-storeroom');
+    if (pSel && pSel.options.length <= 1) pSel.innerHTML = `<option value="">-- Select Product --</option>` + products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    if (sSel && sSel.options.length <= 1) sSel.innerHTML = storerooms.map(sr => `<option value="${sr.id}">${sr.name}</option>`).join('');
+    this.calcDailyStock();
+  },
+
+  onDailyProductChange() {
+    const pid = document.getElementById('daily-update-product').value;
+    const srid = document.getElementById('daily-update-storeroom').value;
+    if (pid && srid) {
+      document.getElementById('daily-update-opening').value = DB.getStock(pid, srid);
+    }
+    this.calcDailyStock();
+  },
+
+  calcDailyStock() {
+    const opening = parseFloat(document.getElementById('daily-update-opening').value) || 0;
+    const purchased = parseFloat(document.getElementById('daily-update-purchased').value) || 0;
+    const transferredIn = parseFloat(document.getElementById('daily-update-tr-in').value) || 0;
+    const sold = parseFloat(document.getElementById('daily-update-sold').value) || 0;
+    const transferredOut = parseFloat(document.getElementById('daily-update-tr-out').value) || 0;
+    const damaged = parseFloat(document.getElementById('daily-update-damaged').value) || 0;
+
+    const closing = opening + purchased + transferredIn - sold - transferredOut - damaged;
+    document.getElementById('daily-update-closing').textContent = closing;
+  },
+
+  saveDailyUpdate(e) {
+    e.preventDefault();
+    const productId = document.getElementById('daily-update-product').value;
+    const storeroomId = document.getElementById('daily-update-storeroom').value;
+    const date = document.getElementById('daily-update-date').value;
+
+    const openingInput = parseFloat(document.getElementById('daily-update-opening').value) || 0;
+    const purchased = parseFloat(document.getElementById('daily-update-purchased').value) || 0;
+    const transferredIn = parseFloat(document.getElementById('daily-update-tr-in').value) || 0;
+    const sold = parseFloat(document.getElementById('daily-update-sold').value) || 0;
+    const transferredOut = parseFloat(document.getElementById('daily-update-tr-out').value) || 0;
+    const damaged = parseFloat(document.getElementById('daily-update-damaged').value) || 0;
+
+    if (!productId || !storeroomId) { App.showToast('Select product and storeroom', 'error'); return; }
+
+    const dbCurrentStock = DB.getStock(productId, storeroomId);
+    const closing = openingInput + purchased + transferredIn - sold - transferredOut - damaged;
+
+    if (confirm(`Confirm Daily Update?\n\nAdmin Opening Stock: ${openingInput}\nNet Calculated Closing Stock: ${closing}`)) {
+      const netDelta = closing - dbCurrentStock;
+      if (netDelta !== 0) {
+        DB.adjustStock(productId, storeroomId, netDelta, 'Daily Update', 'DAILY_UPDATE', App.currentUser.id, `Daily update on ${date}`);
+      }
+      App.showToast(`Daily update saved! Closing stock set to ${closing}`, 'success');
+      document.getElementById('daily-update-form').reset();
+      document.getElementById('daily-update-date').value = date;
+      this.onDailyProductChange();
+    }
+  },
+
+  renderSales() {
+    const sales = DB.table('sales').all();
+    const products = DB.table('products').all();
+    const storerooms = DB.table('storerooms').all();
+
+    const dateInput = document.getElementById('sale-form-date');
+    if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+    const invInput = document.getElementById('sale-form-invoice');
+    if (invInput && !invInput.value) invInput.value = 'INV-' + Math.floor(100000 + Math.random() * 900000);
+
+    const pSel = document.getElementById('sale-form-product');
+    const sSel = document.getElementById('sale-form-storeroom');
+    if (pSel && pSel.options.length <= 1) pSel.innerHTML = `<option value="">-- Select Product --</option>` + products.map(p => `<option value="${p.id}">${p.name} (₹${p.sellingPrice})</option>`).join('');
+    if (sSel && sSel.options.length <= 1) sSel.innerHTML = storerooms.map(sr => `<option value="${sr.id}">${sr.name}</option>`).join('');
+
+    const salesBody = document.getElementById('sales-history-body');
+    if (salesBody) {
+      salesBody.innerHTML = sales.map(s => `
+        <tr><td><strong>${s.invoiceNo}</strong></td><td>${s.date}</td><td><span class="tag">${s.storeroomId}</span></td><td>${s.customer || 'Cash Customer'}</td><td>${s.total}</td><td class="fw-700 text-green">₹${s.total}</td><td><button class="btn btn-secondary btn-sm" onclick="App.printInvoice('${s.id}')">🖨️ Invoice</button></td></tr>
+      `).join('');
+    }
+  },
+
+  onSaleProductChange() {
+    const pid = document.getElementById('sale-form-product').value;
+    if (pid) {
+      const p = DB.table('products').find(pid);
+      if (p) document.getElementById('sale-form-price').value = p.sellingPrice;
+    }
+    this.calcSaleTotal();
+  },
+
+  calcSaleTotal() {
+    const qty = parseFloat(document.getElementById('sale-form-qty').value) || 0;
+    const price = parseFloat(document.getElementById('sale-form-price').value) || 0;
+    document.getElementById('sale-form-total').textContent = '₹' + (qty * price).toLocaleString('en-IN');
+  },
+
+  recordSale(e) {
+    e.preventDefault();
+    const date = document.getElementById('sale-form-date').value;
+    const storeroomId = document.getElementById('sale-form-storeroom').value;
+    const productId = document.getElementById('sale-form-product').value;
+    const qty = parseInt(document.getElementById('sale-form-qty').value) || 0;
+    const price = parseFloat(document.getElementById('sale-form-price').value) || 0;
+    const customer = document.getElementById('sale-form-customer').value;
+    const invoiceNo = document.getElementById('sale-form-invoice').value;
+    const paymentMethod = document.getElementById('sale-form-paymethod').value;
+
+    const currStock = DB.getStock(productId, storeroomId);
+    if (qty > currStock) { App.showToast(`Only ${currStock} available in stock!`, 'error'); return; }
+
+    const total = qty * price;
+    const sale = DB.table('sales').insert({ date, storeroomId, invoiceNo, customer, paymentMethod, staffId: App.currentUser.id, total });
+    DB.table('saleItems').insert({ saleId: sale.id, productId, qty, price, subtotal: total });
+    DB.adjustStock(productId, storeroomId, -qty, 'Sale', invoiceNo, App.currentUser.id, `Sale to ${customer || 'Cash Customer'}`);
+
+    App.showToast(`Sale recorded! Invoice #${invoiceNo}`, 'success');
+    document.getElementById('sale-form').reset();
+    App.renderSales();
+  },
+
+  renderPurchases() {
+    const purchases = DB.table('purchases').all();
+    const suppliers = DB.table('suppliers').all();
+    const products = DB.table('products').all();
+    const storerooms = DB.table('storerooms').all();
+
+    const dateInput = document.getElementById('pur-form-date');
+    if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+    const supSelect = document.getElementById('pur-form-supplier');
+    const prodSelect = document.getElementById('pur-form-product');
+    const srSelect = document.getElementById('pur-form-storeroom');
+
+    if (supSelect && supSelect.options.length <= 1) supSelect.innerHTML = `<option value="">-- Select Supplier --</option>` + suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    if (prodSelect && prodSelect.options.length <= 1) prodSelect.innerHTML = `<option value="">-- Select Product --</option>` + products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    if (srSelect && srSelect.options.length <= 1) srSelect.innerHTML = storerooms.map(sr => `<option value="${sr.id}">${sr.name}</option>`).join('');
+
+    const purBody = document.getElementById('purchases-history-body');
+    if (purBody) {
+      purBody.innerHTML = purchases.map(pur => `
+        <tr><td><strong>${pur.invoiceNo}</strong></td><td>${pur.date}</td><td>${pur.supplierId}</td><td><span class="tag">${pur.storeroomId}</span></td><td>Purchased</td><td class="fw-700 text-green">₹${pur.total}</td><td><span class="badge badge-success">Received</span></td></tr>
+      `).join('');
+    }
+  },
+
+  onPurchaseProductChange() {
+    const pid = document.getElementById('pur-form-product').value;
+    if (pid) {
+      const p = DB.table('products').find(pid);
+      if (p) document.getElementById('pur-form-price').value = p.purchasePrice;
+    }
+    this.calcPurchaseTotal();
+  },
+
+  calcPurchaseTotal() {
+    const qty = parseFloat(document.getElementById('pur-form-qty').value) || 0;
+    const price = parseFloat(document.getElementById('pur-form-price').value) || 0;
+    document.getElementById('pur-form-total').textContent = '₹' + (qty * price).toLocaleString('en-IN');
+  },
+
+  recordPurchase(e) {
+    e.preventDefault();
+    const date = document.getElementById('pur-form-date').value;
+    const supplierId = document.getElementById('pur-form-supplier').value;
+    const invoiceNo = document.getElementById('pur-form-invoice').value;
+    const storeroomId = document.getElementById('pur-form-storeroom').value;
+    const productId = document.getElementById('pur-form-product').value;
+    const qty = parseInt(document.getElementById('pur-form-qty').value) || 0;
+    const price = parseFloat(document.getElementById('pur-form-price').value) || 0;
+
+    const total = qty * price;
+    const pur = DB.table('purchases').insert({ date, supplierId, invoiceNo, storeroomId, total });
+    DB.table('purchaseItems').insert({ purchaseId: pur.id, productId, qty, price, subtotal: total });
+    DB.adjustStock(productId, storeroomId, qty, 'Purchase', invoiceNo, App.currentUser.id, `Stock in purchase #${invoiceNo}`);
+
+    App.showToast(`Purchase recorded! Stock +${qty}`, 'success');
+    document.getElementById('purchase-form').reset();
+    App.renderPurchases();
+  },
+
+  renderTransfers() {
+    const transfers = DB.table('transfers').all();
+    const products = DB.table('products').all();
+    const dateInput = document.getElementById('tr-form-date');
+    if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+
+    const prodSelect = document.getElementById('tr-form-product');
+    const fromSr = document.getElementById('tr-form-from');
+    const toSr = document.getElementById('tr-form-to');
+    const storerooms = DB.table('storerooms').all();
+
+    if (prodSelect && prodSelect.options.length <= 1) prodSelect.innerHTML = `<option value="">-- Select Product --</option>` + products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    if (fromSr && fromSr.options.length <= 1) fromSr.innerHTML = storerooms.map(sr => `<option value="${sr.id}">${sr.name}</option>`).join('');
+    if (toSr && toSr.options.length <= 1) toSr.innerHTML = storerooms.map(sr => `<option value="${sr.id}">${sr.name}</option>`).join('');
+
+    const trBody = document.getElementById('transfers-history-body');
+    if (trBody) {
+      trBody.innerHTML = transfers.map(tr => {
+        const p = products.find(prod => prod.id === tr.productId);
+        return `<tr><td>${tr.date}</td><td><strong>${p?p.name:''}</strong></td><td>${tr.fromStoreroomId}</td><td>➡️</td><td>${tr.toStoreroomId}</td><td class="fw-700">${tr.qty}</td><td><span class="badge badge-info">Done</span></td></tr>`;
+      }).join('');
+    }
+  },
+
+  onTransferFromChange() {
+    const pid = document.getElementById('tr-form-product').value;
+    const fromSr = document.getElementById('tr-form-from').value;
+    if (pid && fromSr) document.getElementById('tr-stock-avail').textContent = `Available: ${DB.getStock(pid, fromSr)}`;
+  },
+
+  recordTransfer(e) {
+    e.preventDefault();
+    const date = document.getElementById('tr-form-date').value;
+    const fromStoreroomId = document.getElementById('tr-form-from').value;
+    const toStoreroomId = document.getElementById('tr-form-to').value;
+    const productId = document.getElementById('tr-form-product').value;
+    const qty = parseInt(document.getElementById('tr-form-qty').value) || 0;
+
+    if (fromStoreroomId === toStoreroomId) { App.showToast('Select different storerooms', 'error'); return; }
+    const avail = DB.getStock(productId, fromStoreroomId);
+    if (qty > avail) { App.showToast(`Only ${avail} available in source room!`, 'error'); return; }
+
+    DB.table('transfers').insert({ date, fromStoreroomId, toStoreroomId, productId, qty, staffId: App.currentUser.id });
+    const ref = 'TR-' + Date.now().toString().slice(-6);
+    DB.adjustStock(productId, fromStoreroomId, -qty, 'Transfer Out', ref, App.currentUser.id);
+    DB.adjustStock(productId, toStoreroomId, qty, 'Transfer In', ref, App.currentUser.id);
+
+    App.showToast(`Transferred ${qty} units!`, 'success');
+    document.getElementById('transfer-form').reset();
+    App.renderTransfers();
+  },
+
+  renderAdjustments() {
+    const adjustments = DB.table('adjustments').all();
+    const products = DB.table('products').all();
+    const dateInput = document.getElementById('adj-form-date');
+    if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+
+    const prodSelect = document.getElementById('adj-form-product');
+    const srSelect = document.getElementById('adj-form-storeroom');
+    const storerooms = DB.table('storerooms').all();
+
+    if (prodSelect && prodSelect.options.length <= 1) prodSelect.innerHTML = `<option value="">-- Select Product --</option>` + products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    if (srSelect && srSelect.options.length <= 1) srSelect.innerHTML = storerooms.map(sr => `<option value="${sr.id}">${sr.name}</option>`).join('');
+
+    const adjBody = document.getElementById('adjustments-history-body');
+    if (adjBody) {
+      adjBody.innerHTML = adjustments.map(adj => {
+        const p = products.find(prod => prod.id === adj.productId);
+        return `<tr><td>${adj.date}</td><td><strong>${p?p.name:''}</strong></td><td>${adj.storeroomId}</td><td><span class="badge badge-danger">${adj.reason}</span></td><td class="fw-700 text-red">${adj.qty}</td><td>${adj.notes}</td></tr>`;
+      }).join('');
+    }
+  },
+
+  recordAdjustment(e) {
+    e.preventDefault();
+    const date = document.getElementById('adj-form-date').value;
+    const storeroomId = document.getElementById('adj-form-storeroom').value;
+    const productId = document.getElementById('adj-form-product').value;
+    const reason = document.getElementById('adj-form-reason').value;
+    const qty = parseInt(document.getElementById('adj-form-qty').value) || 0;
+    const notes = document.getElementById('adj-form-notes').value;
+
+    DB.table('adjustments').insert({ date, storeroomId, productId, reason, qty: -Math.abs(qty), staffId: App.currentUser.id, notes });
+    DB.adjustStock(productId, storeroomId, -Math.abs(qty), reason, 'ADJ-' + Date.now().toString().slice(-6), App.currentUser.id, notes);
+
+    App.showToast('Stock adjustment recorded', 'success');
+    document.getElementById('adjustment-form').reset();
+    App.renderAdjustments();
+  },
+
+  renderSuppliers() {
+    const suppliers = DB.table('suppliers').all();
+    const supBody = document.getElementById('suppliers-table-body');
+    if (supBody) {
+      supBody.innerHTML = suppliers.map(s => `<tr><td><strong>${s.name}</strong></td><td>${s.phone||'-'}</td><td>${s.email||'-'}</td><td>${s.address||'-'}</td><td><button class="btn btn-secondary btn-sm" onclick="App.deleteSupplier('${s.id}')">🗑️</button></td></tr>`).join('');
+    }
+  },
+
+  saveSupplier(e) {
+    e.preventDefault();
+    const name = document.getElementById('sup-form-name').value.trim();
+    DB.table('suppliers').insert({ name, phone: document.getElementById('sup-form-phone').value, email: document.getElementById('sup-form-email').value, address: document.getElementById('sup-form-address').value });
+    App.showToast('Supplier added', 'success');
+    App.closeModal('modal-supplier');
+    App.renderSuppliers();
+  },
+
+  deleteSupplier(supId) {
+    DB.table('suppliers').remove(supId);
+    App.renderSuppliers();
+  },
+
+  renderLowStock() {
+    const products = DB.table('products').all();
+    const storerooms = DB.table('storerooms').all();
+    const alerts = [];
+    products.forEach(p => {
+      storerooms.forEach(sr => {
+        const qty = DB.getStock(p.id, sr.id);
+        if (qty <= p.minStock) alerts.push({ p, sr, qty, isOut: qty === 0 });
+      });
+    });
+
+    document.getElementById('low-stock-body').innerHTML = alerts.map(a => `
+      <tr><td><strong>${a.p.name}</strong></td><td><span class="tag">${a.sr.name}</span></td><td><strong class="${a.isOut?'text-red':'text-orange'}">${a.qty}</strong></td><td>${a.p.minStock}</td><td>${a.isOut?'<span class="badge badge-danger">OUT OF STOCK</span>':'<span class="badge badge-warning">LOW STOCK</span>'}</td><td><button class="btn btn-primary btn-sm" onclick="App.navigateTo('purchases')">📥 Restock</button></td></tr>
+    `).join('');
+  },
+
+  renderExpiryAlerts() {
+    const products = DB.table('products').all();
+    const storerooms = DB.table('storerooms').all();
+    const today = new Date();
+    const items = [];
+    products.forEach(p => {
+      if (p.expiryDate) {
+        const exp = new Date(p.expiryDate);
+        const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+        if (diffDays <= 60) {
+          storerooms.forEach(sr => {
+            const qty = DB.getStock(p.id, sr.id);
+            if (qty > 0) items.push({ p, sr, qty, diffDays, isExpired: diffDays <= 0 });
+          });
+        }
+      }
+    });
+
+    document.getElementById('expiry-alerts-body').innerHTML = items.map(i => `
+      <tr><td><strong>${i.p.name}</strong></td><td>${i.p.batchNo||'N/A'}</td><td>${i.p.expiryDate}</td><td>${i.sr.name}</td><td>${i.qty}</td><td>${i.isExpired?'<span class="badge badge-danger">EXPIRED</span>':'<span class="badge badge-warning">Expiring soon</span>'}</td></tr>
+    `).join('');
+  },
+
+  renderDailyReport() {
+    const dateInput = document.getElementById('report-daily-date');
+    if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+    const date = dateInput.value;
+    const sales = DB.table('sales').where(s => s.date === date);
+    const purchases = DB.table('purchases').where(p => p.date === date);
+
+    document.getElementById('dr-sales-total').textContent = '₹' + sales.reduce((sum, s) => sum + s.total, 0).toLocaleString('en-IN');
+    document.getElementById('dr-purchases-total').textContent = '₹' + purchases.reduce((sum, p) => sum + p.total, 0).toLocaleString('en-IN');
+    document.getElementById('dr-sales-count').textContent = sales.length;
+    document.getElementById('dr-transfers-count').textContent = DB.table('transfers').where(t => t.date === date).length;
+
+    document.getElementById('daily-report-body').innerHTML = sales.map(s => `
+      <tr><td>${s.invoiceNo}</td><td>${s.customer || 'Cash Customer'}</td><td>${s.storeroomId}</td><td>${s.paymentMethod}</td><td class="fw-700 text-green">₹${s.total}</td></tr>
+    `).join('');
+  },
+
+  renderMonthlyReport() {
+    const monthSelect = document.getElementById('report-monthly-month');
+    const yearSelect = document.getElementById('report-monthly-year');
+    if (monthSelect && !monthSelect.value) monthSelect.value = String(new Date().getMonth() + 1).padStart(2, '0');
+    if (yearSelect && !yearSelect.value) yearSelect.value = String(new Date().getFullYear());
+
+    const monthStr = `${yearSelect.value}-${monthSelect.value}`;
+    const sales = DB.table('sales').where(s => s.date && s.date.startsWith(monthStr));
+    const purchases = DB.table('purchases').where(p => p.date && p.date.startsWith(monthStr));
+
+    document.getElementById('mr-total-sales').textContent = '₹' + sales.reduce((sum, s) => sum + s.total, 0).toLocaleString('en-IN');
+    document.getElementById('mr-total-purchases').textContent = '₹' + purchases.reduce((sum, p) => sum + p.total, 0).toLocaleString('en-IN');
+    document.getElementById('mr-total-transfers').textContent = DB.table('transfers').where(t => t.date && t.date.startsWith(monthStr)).length;
+
+    const ctx = document.getElementById('chart-monthly-sales');
+    if (ctx && window.Chart) {
+      const days = new Date(yearSelect.value, monthSelect.value, 0).getDate();
+      const labels = [], data = [];
+      for (let d = 1; d <= days; d++) {
+        const dayStr = `${monthStr}-${String(d).padStart(2, '0')}`;
+        labels.push(`Day ${d}`);
+        data.push(sales.filter(s => s.date === dayStr).reduce((sum, s) => sum + s.total, 0));
+      }
+      if (this.charts.monthlySales) this.charts.monthlySales.destroy();
+      this.charts.monthlySales = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Daily Sales (₹)', data, backgroundColor: '#40916c' }] }, options: { responsive: true, maintainAspectRatio: false } });
+    }
+  },
+
+  renderYearlyReport() {
+    const yearSelect = document.getElementById('report-yearly-year');
+    if (yearSelect && !yearSelect.value) yearSelect.value = String(new Date().getFullYear());
+    const yearStr = yearSelect.value;
+    const sales = DB.table('sales').where(s => s.date && s.date.startsWith(yearStr));
+    const purchases = DB.table('purchases').where(p => p.date && p.date.startsWith(yearStr));
+
+    document.getElementById('yr-total-sales').textContent = '₹' + sales.reduce((sum, s) => sum + s.total, 0).toLocaleString('en-IN');
+    document.getElementById('yr-total-purchases').textContent = '₹' + purchases.reduce((sum, p) => sum + p.total, 0).toLocaleString('en-IN');
+
+    const ctx = document.getElementById('chart-yearly-sales');
+    if (ctx && window.Chart) {
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const salesData = [], purData = [];
+      months.forEach((m, idx) => {
+        const mStr = `${yearStr}-${String(idx + 1).padStart(2, '0')}`;
+        salesData.push(sales.filter(s => s.date && s.date.startsWith(mStr)).reduce((sum, s) => sum + s.total, 0));
+        purData.push(purchases.filter(p => p.date && p.date.startsWith(mStr)).reduce((sum, p) => sum + p.total, 0));
+      });
+      if (this.charts.yearlySales) this.charts.yearlySales.destroy();
+      this.charts.yearlySales = new Chart(ctx, { type: 'bar', data: { labels: months, datasets: [{ label: 'Sales', data: salesData, backgroundColor: '#2d6a4f' }, { label: 'Purchases', data: purData, backgroundColor: '#ea580c' }] }, options: { responsive: true, maintainAspectRatio: false } });
+    }
+  },
+
+  renderProductReport() {
+    const products = DB.table('products').all();
+    const select = document.getElementById('report-product-select');
+    if (select && select.options.length <= 1) select.innerHTML = products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    const selectedPid = select ? select.value || (products[0] ? products[0].id : '') : '';
+    if (!selectedPid) return;
+
+    const p = products.find(prod => prod.id === selectedPid);
+    const history = DB.table('invHistory').where(h => h.productId === selectedPid);
+    let purQty = 0, soldQty = 0, damQty = 0;
+    history.forEach(h => {
+      if (h.txType === 'Purchase') purQty += h.qty;
+      else if (h.txType === 'Sale') soldQty += h.qty;
+      else if (h.txType === 'Damaged' || h.txType === 'Expired') damQty += h.qty;
+    });
+
+    document.getElementById('pr-prod-name').textContent = p.name;
+    document.getElementById('pr-purchased').textContent = purQty;
+    document.getElementById('pr-sold').textContent = soldQty;
+    document.getElementById('pr-damaged').textContent = damQty;
+    document.getElementById('pr-current').textContent = DB.getStock(selectedPid, 'sr1') + DB.getStock(selectedPid, 'sr2') + DB.getStock(selectedPid, 'sr3');
+    document.getElementById('pr-sales-val').textContent = '₹' + (soldQty * p.sellingPrice).toLocaleString('en-IN');
+  },
+
+  renderStoreroomReport() {
+    const storerooms = DB.table('storerooms').all();
+    const products = DB.table('products').all();
+    const stocks = DB.table('stock').all();
+    const sales = DB.table('sales').all();
+
+    document.getElementById('storeroom-report-body').innerHTML = storerooms.map(sr => {
+      const srStocks = stocks.filter(s => s.storeroomId === sr.id);
+      const totalQty = srStocks.reduce((sum, s) => sum + s.qty, 0);
+      const activeProducts = srStocks.filter(s => s.qty > 0).length;
+      const srSales = sales.filter(s => s.storeroomId === sr.id).reduce((sum, s) => sum + s.total, 0);
+      let totalValue = 0;
+      srStocks.forEach(s => {
+        const p = products.find(prod => prod.id === s.productId);
+        if (p) totalValue += (s.qty * p.purchasePrice);
+      });
+
+      return `<tr><td><strong>🏪 ${sr.name}</strong></td><td>${activeProducts} / ${products.length}</td><td class="fw-700">${totalQty}</td><td>₹${totalValue.toLocaleString('en-IN')}</td><td class="fw-700 text-green">₹${srSales.toLocaleString('en-IN')}</td></tr>`;
+    }).join('');
+  },
+
+  renderHistory() {
+    const history = DB.table('invHistory').all();
+    const products = DB.table('products').all();
+    document.getElementById('history-table-body').innerHTML = history.map(h => {
+      const p = products.find(prod => prod.id === h.productId);
+      return `<tr><td><span class="fs-xs">${h.date} ${h.time}</span></td><td><strong>${p?p.name:''}</strong></td><td>${h.storeroomId}</td><td><span class="badge ${h.direction==='+'?'badge-success':'badge-danger'}">${h.txType}</span></td><td>${h.direction}${h.qty}</td><td>${h.prevQty} ➡️ <strong>${h.newQty}</strong></td><td>${h.userId}</td><td>${h.ref||'-'} ${h.notes||''}</td></tr>`;
+    }).join('');
+  },
+
+  renderUsers() {
+    const users = DB.table('users').all();
+    document.getElementById('users-table-body').innerHTML = users.map(u => `
+      <tr><td><strong>${u.name}</strong></td><td>${u.email}</td><td><span class="badge ${u.role==='admin'?'badge-gold':'badge-info'}">${u.role.toUpperCase()}</span></td><td><span class="badge badge-success">${u.status}</span></td><td>${u.id!==this.currentUser.id?`<button class="btn btn-secondary btn-sm" onclick="App.deleteUser('${u.id}')">🗑️</button>`:'Current User'}</td></tr>
+    `).join('');
+  },
+
+  saveUser(e) {
+    e.preventDefault();
+    DB.table('users').insert({ name: document.getElementById('user-form-name').value, email: document.getElementById('user-form-email').value, password: document.getElementById('user-form-password').value, role: document.getElementById('user-form-role').value, status:'active' });
+    App.showToast('User created', 'success');
+    App.closeModal('modal-user');
+    App.renderUsers();
+  },
+
+  deleteUser(userId) { DB.table('users').remove(userId); App.renderUsers(); },
+
+  renderSettings() {
+    document.getElementById('setting-supabase-url').value = localStorage.getItem('supabase_url') || '';
+    document.getElementById('setting-supabase-key').value = localStorage.getItem('supabase_key') || '';
+  },
+
+  saveSettings(e) {
+    e.preventDefault();
+    localStorage.setItem('supabase_url', document.getElementById('setting-supabase-url').value);
+    localStorage.setItem('supabase_key', document.getElementById('setting-supabase-key').value);
+    App.showToast('Settings saved', 'success');
+  },
+
+  exportToCSV(filename, tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    let csv = [];
+    const rows = table.querySelectorAll('tr');
+    for (let i = 0; i < rows.length; i++) {
+      const row = [], cols = rows[i].querySelectorAll('td, th');
+      for (let j = 0; j < cols.length - 1; j++) row.push('"' + cols[j].innerText.replace(/"/g, '""').replace(/\n/g, ' ') + '"');
+      csv.push(row.join(','));
+    }
+    const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+    const downloadLink = document.createElement('a');
+    downloadLink.download = filename + '.csv';
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = 'none';
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    App.showToast(`Exported ${filename}.csv`, 'success');
+  },
+
+  printReport() { this.printSpecificReport(this.currentView); },
+
+  printSpecificReport(viewId) {
+    document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('print-active'));
+    const panel = document.getElementById(`view-${viewId}`);
+    if (panel) panel.classList.add('print-active');
+
+    let printHeader = panel.querySelector('.print-only-header');
+    if (!printHeader) {
+      printHeader = document.createElement('div');
+      printHeader.className = 'print-only-header';
+      panel.insertBefore(printHeader, panel.firstChild);
+    }
+
+    const titles = {
+      'daily-report': 'DAILY SALES & INVENTORY REPORT',
+      'monthly-report': 'MONTHLY SALES & INVENTORY STATEMENT',
+      'yearly-report': 'YEARLY FINANCIAL SALES REPORT',
+      'product-report': 'PRODUCT-WISE SALES REPORT',
+      'storeroom-report': 'STOREROOM COMPARISON REPORT',
+      'history': 'INVENTORY AUDIT LEDGER STATEMENT'
+    };
+    const dateStr = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    printHeader.innerHTML = `
+      <h1>🌱 AGRI SHOP AGRICULTURE STORE</h1>
+      <p><b>Official Report:</b> ${titles[viewId] || 'INVENTORY & SALES REPORT'} | <b>Generated On:</b> ${dateStr}</p>
+      <p><b>Generated By:</b> ${this.currentUser.name} (${this.currentUser.role.toUpperCase()}) | <b>Storerooms:</b> Main Store (SR1), Store Room 2 (SR2), Store Room 3 (SR3)</p>
+    `;
+    setTimeout(() => { window.print(); }, 150);
+  },
+
+  printInvoice(saleId) {
+    const sale = DB.table('sales').find(saleId);
+    if (!sale) return;
+    const items = DB.table('saleItems').where(i => i.saleId === saleId);
+    const products = DB.table('products').all();
+    const sr = DB.table('storerooms').find(sale.storeroomId);
+
+    const win = window.open('', '_blank', 'width=600,height=600');
+    win.document.write(`
+      <html><head><title>Invoice #${sale.invoiceNo}</title><style>body{font-family:sans-serif;padding:20px;color:#333;} .header{text-align:center;border-bottom:2px solid #2d6a4f;padding-bottom:10px;margin-bottom:20px;} h1{color:#2d6a4f;} table{width:100%;border-collapse:collapse;margin-top:20px;} th,td{border:1px solid #ddd;padding:8px;text-align:left;} th{background:#f4f4f4;} .total{text-align:right;margin-top:20px;font-size:1.2rem;font-weight:bold;color:#2d6a4f;}</style></head>
+      <body>
+        <div class="header"><h1>🌱 Agriculture Shop</h1><p>Invoice #: ${sale.invoiceNo} | Date: ${sale.date}</p><p>Storeroom: ${sr?sr.name:''}</p></div>
+        <p><strong>Customer:</strong> ${sale.customer || 'Cash Customer'}</p><p><strong>Payment Method:</strong> ${sale.paymentMethod}</p>
+        <table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead><tbody>${items.map(i => { const p = products.find(prod => prod.id === i.productId); return `<tr><td>${p?p.name:''}</td><td>${i.qty}</td><td>₹${i.price}</td><td>₹${i.subtotal}</td></tr>`; }).join('')}</tbody></table>
+        <div class="total">Total Paid: ₹${sale.total.toLocaleString('en-IN')}</div>
+        <script>window.print();<\/script>
+      </body></html>
+    `);
+    win.document.close();
+  },
+
+  openModal(modalId) { const m = document.getElementById(modalId); if (m) m.classList.add('active'); },
+  closeModal(modalId) { const m = document.getElementById(modalId); if (m) m.classList.remove('active'); },
+
+  showToast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<div class="toast-icon">${icons[type]||'ℹ️'}</div><div class="toast-body"><div class="toast-title">${type.toUpperCase()}</div><div class="toast-msg">${message}</div></div><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+    container.appendChild(toast);
+    setTimeout(() => { if (toast.parentElement) toast.remove(); }, 4000);
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => App.init());
+  </script>
+</body>
+</html>
